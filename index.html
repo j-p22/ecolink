@@ -934,6 +934,16 @@ window.addEventListener('DOMContentLoaded',()=>{
             }
         });
 });
+// Add this right where your other window.onload / initialization logic is
+window.addEventListener('DOMContentLoaded', () => {
+    // 1. Fetch data immediately when someone opens the site
+    if (typeof initLeaderboard === 'function') {
+        initLeaderboard();
+    }
+    if (typeof fetchGlobalStats === 'function') {
+        fetchGlobalStats();
+    }
+});
 document.addEventListener('click',e=>{if(e.target.closest('button')){const txt=e.target.textContent||'';if(txt.includes('Enter')||txt.includes('Submit')||txt.includes('Confirm'))playTone(850,1100,0.15);else playTone(650,'sine',0.08,0.05);}},true);
 window.onload=()=>{updatePublicLeaderboards();initScrollAnimations();initLeaves();initNavShrink();checkFirstVisit();};
 </script>
