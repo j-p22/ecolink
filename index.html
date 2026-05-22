@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoLink | Network Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Inter', system-ui, sans-serif; font-size: 1rem; -webkit-font-smoothing: antialiased; }
+        :root {
+            --accent: #a3e635; --accent-light: #bef264; --accent-dark: #65a30d; --accent-secondary: #4ade80;
+            --accent-rgb: 163,230,53; --accent-sec-rgb: 74,222,128;
+            --bg-deep: #0d1f10; --bg-dark: #1a2e1e; --bg-card: #152219;
+            --bg-hero-start: #1a2e1e; --bg-hero-mid: #0d1f10; --bg-hero-end: #091a0c; --bg-hero-final: #0a1210;
+            --nav-bg: rgba(15,26,17,0.9); --footer-bg: #0f1a11;
+            --gradient-text-1: #a3e635; --gradient-text-2: #4ade80; --gradient-text-3: #bef264;
+        }
+        body.theme-forest {
+            --accent: #a3e635; --accent-light: #bef264; --accent-dark: #65a30d; --accent-secondary: #4ade80;
+            --accent-rgb: 163,230,53; --accent-sec-rgb: 74,222,128;
+            --bg-deep: #0d1f10; --bg-dark: #1a2e1e; --bg-card: #152219;
+            --bg-hero-start: #1a2e1e; --bg-hero-mid: #0d1f10; --bg-hero-end: #091a0c; --bg-hero-final: #0a1210;
+            --nav-bg: rgba(15,26,17,0.9); --footer-bg: #0f1a11;
+            --gradient-text-1: #a3e635; --gradient-text-2: #4ade80; --gradient-text-3: #bef264;
+        }
+        body.theme-ocean {
+            --accent: #38bdf8; --accent-light: #7dd3fc; --accent-dark: #0284c7; --accent-secondary: #22d3ee;
+            --accent-rgb: 56,189,248; --accent-sec-rgb: 34,211,238;
+            --bg-deep: #0c1929; --bg-dark: #0f2744; --bg-card: #112236;
+            --bg-hero-start: #0f2744; --bg-hero-mid: #0c1929; --bg-hero-end: #081220; --bg-hero-final: #0a1520;
+            --nav-bg: rgba(12,25,41,0.9); --footer-bg: #0c1929;
+            --gradient-text-1: #38bdf8; --gradient-text-2: #22d3ee; --gradient-text-3: #7dd3fc;
+        }
+        body.theme-sunset {
+            --accent: #fb923c; --accent-light: #fdba74; --accent-dark: #c2410c; --accent-secondary: #f97316;
+            --accent-rgb: 251,146,60; --accent-sec-rgb: 249,115,22;
+            --bg-deep: #1c1008; --bg-dark: #2d1a0e; --bg-card: #261610;
+            --bg-hero-start: #2d1a0e; --bg-hero-mid: #1c1008; --bg-hero-end: #150d06; --bg-hero-final: #12100a;
+            --nav-bg: rgba(28,16,8,0.9); --footer-bg: #1c1008;
+            --gradient-text-1: #fb923c; --gradient-text-2: #f97316; --gradient-text-3: #fdba74;
+        }
+        body.theme-night {
+            --accent: #a78bfa; --accent-light: #c4b5fd; --accent-dark: #7c3aed; --accent-secondary: #818cf8;
+            --accent-rgb: 167,139,250; --accent-sec-rgb: 129,140,248;
+            --bg-deep: #110e1f; --bg-dark: #1e1735; --bg-card: #19142d;
+            --bg-hero-start: #1e1735; --bg-hero-mid: #110e1f; --bg-hero-end: #0d0a18; --bg-hero-final: #0e0c15;
+            --nav-bg: rgba(17,14,31,0.9); --footer-bg: #110e1f;
+            --gradient-text-1: #a78bfa; --gradient-text-2: #818cf8; --gradient-text-3: #c4b5fd;
+        }
+        body.theme-beachside {
+            --accent: #facc15; --accent-light: #fde047; --accent-dark: #ca8a04; --accent-secondary: #fb923c;
+            --accent-rgb: 250,204,21; --accent-sec-rgb: 251,146,60;
+            --bg-deep: #1a1608; --bg-dark: #2d2510; --bg-card: #262010;
+            --bg-hero-start: #2d2510; --bg-hero-mid: #1a1608; --bg-hero-end: #151206; --bg-hero-final: #12110a;
+            --nav-bg: rgba(26,22,8,0.9); --footer-bg: #1a1608;
+            --gradient-text-1: #facc15; --gradient-text-2: #fb923c; --gradient-text-3: #fde047;
+        }
+        body.theme-rainbow {
+            --accent: #f472b6; --accent-light: #f9a8d4; --accent-dark: #db2777; --accent-secondary: #a78bfa;
+            --accent-rgb: 244,114,182; --accent-sec-rgb: 167,139,250;
+            --bg-deep: #1a0a1e; --bg-dark: #2d1535; --bg-card: #26122d;
+            --bg-hero-start: #2d1535; --bg-hero-mid: #1a0a1e; --bg-hero-end: #150818; --bg-hero-final: #120a15;
+            --nav-bg: rgba(26,10,30,0.9); --footer-bg: #1a0a1e;
+            --gradient-text-1: #ef4444; --gradient-text-2: #3b82f6; --gradient-text-3: #22c55e;
+        }
+      body.theme-rainbow .gradient-text {
+    background: linear-gradient(135deg, #ef4444, #f97316, #facc15, #22c55e, #3b82f6, #8b5cf6, #ec4899, #ef4444);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    background-size: 400% 400%; animation: rainbowShift 3s linear infinite;
+}
+body.theme-rainbow .aurora {
+    background: linear-gradient(135deg, rgba(239,68,68,0.13), rgba(249,115,22,0.11), rgba(250,204,21,0.10), rgba(34,197,94,0.11), rgba(59,130,246,0.12), rgba(139,92,246,0.13), rgba(236,72,153,0.11), rgba(239,68,68,0.12));
+    background-size: 600% 600%;
+    animation: rainbowBG 8s ease infinite;
+    filter: blur(80px);
+}
+@keyframes rainbowShift { 0% { background-position: 0% 50%; } 100% { background-position: 400% 50%; } }
+@keyframes rainbowBG { 0% { background-position: 0% 50%; } 25% { background-position: 50% 100%; } 50% { background-position: 100% 50%; } 75% { background-position: 50% 0%; } 100% { background-position: 0% 50%; } }
+body.theme-rainbow .eco-gradient {
+    background: linear-gradient(160deg, #1a0a1e 0%, #150818 40%, #120a15 70%, #0e0812 100%);
+    position: relative; overflow: hidden;
+}
+body.theme-rainbow .eco-gradient::before {
+    content: ''; position: absolute; inset: -30%;
+    background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(249,115,22,0.10), rgba(250,204,21,0.09), rgba(34,197,94,0.10), rgba(59,130,246,0.11), rgba(139,92,246,0.12), rgba(236,72,153,0.10), rgba(239,68,68,0.11));
+    background-size: 500% 500%;
+    animation: rainbowBG 10s ease infinite;
+    filter: blur(100px);
+    pointer-events: none;
+}
+body.theme-rainbow .eco-gradient::after {
+    content: ''; position: absolute; inset: -20%;
+    background: linear-gradient(225deg, rgba(236,72,153,0.08), rgba(59,130,246,0.08), rgba(250,204,21,0.06), rgba(34,197,94,0.07), rgba(139,92,246,0.08));
+    background-size: 400% 400%;
+    animation: rainbowBG 12s ease infinite reverse;
+    filter: blur(120px);
+    pointer-events: none;
+}
+body.theme-rainbow .glass-card { border-color: rgba(236,72,153,0.15); }
+body.theme-rainbow .glass-card:hover { border-color: rgba(139,92,246,0.25); }
+body.theme-rainbow .glass-card::before {
+    background: linear-gradient(90deg, rgba(239,68,68,0.3), rgba(250,204,21,0.3), rgba(34,197,94,0.3), rgba(59,130,246,0.3), rgba(139,92,246,0.3), rgba(236,72,153,0.3));
+    background-size: 400% 100%;
+    animation: rainbowShift 4s linear infinite;
+    height: 2px;
+}
+body.theme-rainbow .accent-bg {
+    background: linear-gradient(135deg, #ef4444, #f97316, #facc15, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+    background-size: 400% 400%;
+    animation: rainbowShift 4s linear infinite;
+}
+body.theme-rainbow .accent-text {
+    background: linear-gradient(135deg, #ef4444, #f97316, #facc15, #22c55e, #3b82f6, #8b5cf6, #ec4899, #ef4444);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    background-size: 400% 400%;
+    animation: rainbowShift 4s linear infinite;
+}
+body.theme-rainbow .goal-bar-fill {
+    background: linear-gradient(90deg, #ef4444, #f97316, #facc15, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+    background-size: 400% 100%;
+    animation: rainbowShift 3s linear infinite;
+}
+body.theme-rainbow .btn-glow:hover { box-shadow: 0 0 30px rgba(139,92,246,0.3), 0 0 60px rgba(236,72,153,0.15); }
+body.theme-rainbow .pulse-dot {
+    background: linear-gradient(135deg, #ef4444, #8b5cf6, #22c55e);
+    background-size: 300% 300%;
+    animation: rainbowShift 3s linear infinite, pulse 2s ease infinite;
+}
+body.theme-rainbow .sparkline-bar {
+    background: linear-gradient(to top, rgba(139,92,246,0.4), rgba(236,72,153,0.7), rgba(250,204,21,0.6));
+}
+body.theme-rainbow nav {
+    background: rgba(26,10,30,0.85);
+    border-bottom-color: rgba(139,92,246,0.1);
+}
+body.theme-rainbow .portal-overlay { background: rgba(18,8,21,0.97); }
+body.theme-rainbow .stat-box::after {
+    background: linear-gradient(90deg, transparent, rgba(236,72,153,0.08), rgba(59,130,246,0.06), transparent);
+}
+body.theme-rainbow #scrollProgress {
+    background: linear-gradient(90deg, #ef4444, #f97316, #facc15, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+    background-size: 400% 100%;
+    animation: rainbowShift 3s linear infinite;
+}
+body.theme-rainbow .eco-fact-card {
+    background: linear-gradient(135deg, rgba(139,92,246,0.06), rgba(236,72,153,0.04), rgba(59,130,246,0.04));
+    border-color: rgba(139,92,246,0.15);
+}
+body.theme-rainbow .milestone-preview {
+    background: linear-gradient(135deg, rgba(236,72,153,0.06), rgba(139,92,246,0.04));
+    border-color: rgba(236,72,153,0.15);
+}
+body.theme-rainbow .submit-btn:hover {
+    background: linear-gradient(135deg, #ef4444, #f97316, #facc15, #22c55e, #3b82f6, #8b5cf6, #ec4899);
+    background-size: 400% 400%;
+    animation: rainbowShift 3s linear infinite;
+    border-color: transparent;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+body.theme-rainbow .toast {
+    border-color: rgba(139,92,246,0.35);
+}
+        #mouseGlow {
+            position: fixed; left: 0; top: 0; width: 220px; height: 220px; border-radius: 50%; pointer-events: none;
+            background: radial-gradient(circle, rgba(var(--accent-rgb),0.18) 0%, rgba(var(--accent-rgb),0.06) 40%, transparent 70%);
+            transform: translate(-50%, -50%); filter: blur(20px); mix-blend-mode: screen; z-index: 9999; transition: opacity 0.3s;
+        }
+        .eco-gradient {
+            background: linear-gradient(160deg, var(--bg-hero-start) 0%, var(--bg-hero-mid) 40%, var(--bg-hero-end) 70%, var(--bg-hero-final) 100%);
+            position: relative; overflow: hidden;
+        }
+        .eco-gradient::before { content:''; position:absolute; top:15%; left:5%; width:700px; height:700px; background:radial-gradient(circle, rgba(var(--accent-rgb),0.07) 0%, transparent 65%); pointer-events:none; }
+        .eco-gradient::after { content:''; position:absolute; bottom:5%; right:0%; width:500px; height:500px; background:radial-gradient(circle, rgba(var(--accent-sec-rgb),0.05) 0%, transparent 65%); pointer-events:none; }
+        .gradient-text {
+            background: linear-gradient(135deg, var(--gradient-text-1) 0%, var(--gradient-text-2) 25%, var(--gradient-text-3) 50%, var(--gradient-text-2) 75%, var(--gradient-text-1) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; background-size: 400% 400%; animation: gradientShift 6s ease infinite;
+        }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        #leaf-canvas { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+        header > * { position: relative; z-index: 1; }
+        .aurora { position:absolute; inset:-20%; background:radial-gradient(circle at 20% 20%, rgba(var(--accent-rgb),0.12), transparent 25%), radial-gradient(circle at 80% 30%, rgba(var(--accent-sec-rgb),0.12), transparent 25%), radial-gradient(circle at 50% 80%, rgba(var(--accent-rgb),0.08), transparent 30%); filter:blur(90px); animation:auroraMove 20s ease-in-out infinite alternate; z-index:0; pointer-events:none; }
+        @keyframes auroraMove { 0% { transform: translate3d(0,0,0) scale(1); } 100% { transform: translate3d(-40px,-20px,0) scale(1.08); } }
+        nav { transition: all 0.35s cubic-bezier(0.22,1,0.36,1); background: var(--nav-bg); backdrop-filter: blur(16px); }
+        nav.scrolled { padding-top: 0.6rem !important; padding-bottom: 0.6rem !important; box-shadow: 0 4px 30px rgba(0,0,0,0.3); }
+        /* BUG FIX: portal overlay uses theme bg */
+        .portal-overlay { display:none; position:fixed; inset:0; z-index:100; background:var(--bg-deep); backdrop-filter:blur(24px) saturate(1.2); justify-content:center; align-items:center; padding:1.5rem; opacity:0; transition:opacity 0.3s ease; }
+        .portal-overlay.active { display: flex !important; animation: fadeIn 0.3s ease forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        .portal-container { display:none; width:100%; max-width:600px; transform:translateY(20px) scale(0.97); opacity:0; transition:transform 0.4s cubic-bezier(0.22,1,0.36,1), opacity 0.3s ease; }
+        .portal-active { display: block !important; transform: translateY(0) scale(1) !important; opacity: 1 !important; }
+        .circle-progress { transition: stroke-dashoffset 1s cubic-bezier(0.22,1,0.36,1); stroke-linecap: round; }
+        h1, h2, h3 { letter-spacing: -0.03em; }
+        .tab-scroll::-webkit-scrollbar { height: 4px; }
+        .tab-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
+        .tab-scroll::-webkit-scrollbar-thumb { background: rgba(var(--accent-rgb),0.4); border-radius: 10px; }
+        .portal-container::-webkit-scrollbar { width: 6px; }
+        .portal-container::-webkit-scrollbar-track { background: transparent; }
+        .portal-container::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .reveal { opacity:0; transform:translateY(50px); transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+        .reveal.visible { opacity:1; transform:translateY(0); }
+        .reveal-left { opacity:0; transform:translateX(-50px); transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+        .reveal-left.visible { opacity:1; transform:translateX(0); }
+        .reveal-right { opacity:0; transform:translateX(50px); transition:opacity 0.7s cubic-bezier(0.22,1,0.36,1), transform 0.7s cubic-bezier(0.22,1,0.36,1); }
+        .reveal-right.visible { opacity:1; transform:translateX(0); }
+        .stagger-children > * { opacity:0; transform:translateY(30px); transition:opacity 0.5s cubic-bezier(0.22,1,0.36,1), transform 0.5s cubic-bezier(0.22,1,0.36,1); }
+        .stagger-children.visible > *:nth-child(1) { opacity:1; transform:translateY(0); transition-delay:0s; }
+        .stagger-children.visible > *:nth-child(2) { opacity:1; transform:translateY(0); transition-delay:0.08s; }
+        .stagger-children.visible > *:nth-child(3) { opacity:1; transform:translateY(0); transition-delay:0.16s; }
+        .stagger-children.visible > *:nth-child(4) { opacity:1; transform:translateY(0); transition-delay:0.24s; }
+        .stagger-children.visible > *:nth-child(5) { opacity:1; transform:translateY(0); transition-delay:0.32s; }
+        .stagger-children.visible > *:nth-child(n+6) { opacity:1; transform:translateY(0); transition-delay:0.4s; }
+        .hero-badge { opacity:0; transform:translateY(16px); animation:heroIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.15s forwards; }
+        .hero-title { opacity:0; transform:translateY(24px); animation:heroIn 0.8s cubic-bezier(0.22,1,0.36,1) 0.3s forwards; }
+        .hero-sub { opacity:0; transform:translateY(20px); animation:heroIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.45s forwards; }
+        .hero-stat { opacity:0; transform:translateY(24px); animation:heroIn 0.8s cubic-bezier(0.22,1,0.36,1) 0.5s forwards; }
+        .hero-btns { opacity:0; transform:translateY(16px); animation:heroIn 0.7s cubic-bezier(0.22,1,0.36,1) 0.65s forwards; }
+        .hero-card { opacity:0; transform:translateX(30px) scale(0.96); animation:heroCardIn 0.9s cubic-bezier(0.22,1,0.36,1) 0.5s forwards; }
+        @keyframes heroIn { to { opacity:1; transform:translateY(0); } }
+        @keyframes heroCardIn { to { opacity:1; transform:translateX(0) scale(1); } }
+        .lb-row { transition: all 0.25s cubic-bezier(0.22,1,0.36,1); border-radius: 1rem; }
+        .lb-row:hover { transform: translateX(4px); background: rgba(var(--accent-rgb),0.04); }
+        .card-hover { transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), box-shadow 0.35s ease; }
+        .card-hover:hover { transform: translateY(-4px); box-shadow: 0 20px 50px rgba(0,0,0,0.12); }
+        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(12px); }
+       .glass-card { background:linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.02) 100%); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.08); box-shadow:0 8px 32px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.06); transition:all 0.35s cubic-bezier(0.22,1,0.36,1); position:relative; overflow:visible; }
+        .glass-card::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, rgba(var(--accent-rgb),0.2), transparent); }
+        .glass-card:hover { box-shadow:0 12px 40px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08); border-color:rgba(var(--accent-rgb),0.15); transform:translateY(-2px); }
+        .btn-glow { position:relative; overflow:hidden; transition:transform 0.2s ease, box-shadow 0.3s ease; }
+        .btn-glow::after { content:''; position:absolute; inset:0; background:linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%); opacity:0; transition:opacity 0.3s ease; }
+        .btn-glow:hover { transform:scale(1.03); box-shadow:0 0 30px rgba(var(--accent-rgb),0.3); }
+        .btn-glow:hover::after { opacity:1; }
+        .btn-glow:active { transform: scale(0.95); }
+        button { transition: transform 0.15s ease; }
+        button:active { transform: scale(0.96) !important; }
+        .stat-box { position:relative; overflow:hidden; z-index:0; }
+        .stat-box::after { content:''; position:absolute; top:-50%; left:-60%; width:30%; height:200%; background:linear-gradient(90deg, transparent, rgba(var(--accent-rgb),0.06), transparent); animation:shimmer 4s ease infinite; }
+        @keyframes shimmer { 0% { left:-60%; } 100% { left:120%; } }
+        .section-light { background: linear-gradient(180deg, #f8faf5 0%, #f1f5ee 100%); }
+        .mission-bg { background: linear-gradient(135deg, #ffffff 0%, #f7fdf4 100%); }
+        .rank-1 { background:linear-gradient(135deg, #fbbf24, #f59e0b); color:#000; border-radius:10px; padding:3px 10px; font-weight:900; font-size:0.75rem; }
+        .rank-2 { background:linear-gradient(135deg, #cbd5e1, #94a3b8); color:#1e293b; border-radius:10px; padding:3px 10px; font-weight:900; font-size:0.75rem; }
+        .rank-3 { background:linear-gradient(135deg, #d97706, #b45309); color:#fff; border-radius:10px; padding:3px 10px; font-weight:900; font-size:0.75rem; }
+        .pulse-dot { display:inline-block; width:8px; height:8px; background:var(--accent); border-radius:50%; margin-right:8px; animation:pulse 2s ease infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); box-shadow:0 0 0 0 rgba(var(--accent-rgb),0.5); } 50% { opacity:0.85; transform:scale(1.2); box-shadow:0 0 0 6px rgba(var(--accent-rgb),0); } }
+        #toastContainer { position:fixed; bottom:2rem; right:2rem; z-index:9999; display:flex; flex-direction:column; gap:0.75rem; pointer-events:none; }
+        .toast { background:var(--bg-dark); backdrop-filter:blur(16px); border:1px solid rgba(var(--accent-rgb),0.25); color:white; padding:0.875rem 1.25rem; border-radius:1rem; font-weight:700; font-size:0.825rem; box-shadow:0 8px 32px rgba(0,0,0,0.35); display:flex; align-items:center; gap:0.625rem; animation:toastIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards; pointer-events:auto; max-width:360px; }
+        .toast.success { border-color: rgba(var(--accent-rgb),0.35); }
+        .toast.milestone { border-color: rgba(251,191,36,0.5); background: rgba(30,26,6,0.95); }
+        .toast.error { border-color: rgba(239,68,68,0.4); background: rgba(30,10,10,0.95); }
+        @keyframes toastIn { from { opacity:0; transform:translateY(12px) scale(0.96); } to { opacity:1; transform:translateY(0) scale(1); } }
+        @keyframes toastOut { to { opacity:0; transform:translateY(-8px) scale(0.96); } }
+        .modal-overlay { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,0.6); backdrop-filter:blur(12px); justify-content:center; align-items:center; padding:1rem; }
+        .modal-overlay.active { display: flex !important; }
+        .modal-box { background:linear-gradient(160deg, var(--bg-dark), var(--bg-card)); border:1px solid rgba(255,255,255,0.08); border-radius:1.75rem; padding:2.5rem; text-align:left; color:white; max-width:520px; width:100%; box-shadow:0 24px 60px rgba(0,0,0,0.5); animation:modalIn 0.3s cubic-bezier(0.22,1,0.36,1); }
+        .modal-box h3 { text-align: center; }
+        .modal-box .modal-subtitle { text-align: center; }
+        .modal-input { width:100%; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.08); padding:0.875rem 1rem; border-radius:0.75rem; color:white; font-size:0.9rem; font-weight:600; outline:none; transition:border-color 0.2s; font-family:'Inter',system-ui,sans-serif; }
+        .modal-input:focus { border-color:rgba(var(--accent-rgb),0.5); box-shadow:0 0 0 3px rgba(var(--accent-rgb),0.1); }
+        .modal-input::placeholder { color: #475569; }
+        .modal-label { display:block; font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.1em; color:#94a3b8; margin-bottom:0.375rem; }
+        .modal-row { margin-bottom: 1rem; }
+        .modal-actions { display:flex; gap:0.75rem; margin-top:1.5rem; }
+        .modal-actions button { flex:1; padding:0.875rem; border-radius:0.75rem; font-weight:700; font-size:0.85rem; text-transform:uppercase; border:none; cursor:pointer; transition:all 0.2s; font-family:'Inter',system-ui,sans-serif; }
+        .modal-btn-cancel { background:rgba(255,255,255,0.08); color:white; }
+        .modal-btn-cancel:hover { background:rgba(255,255,255,0.15); }
+        .modal-btn-primary { background:var(--accent); color:#0f1a11; }
+        .modal-btn-primary:hover { background:var(--accent-light); }
+        .modal-btn-danger { background:#ef4444; color:white; }
+        .modal-btn-danger:hover { background:#f87171; }
+        .modal-btn-amber { background:#fbbf24; color:#0f1a11; }
+        .modal-btn-amber:hover { background:#fcd34d; }
+        /* BUG FIX: confirm overlay z-index 300 so it appears ABOVE recyclables editor */
+        .confirm-overlay { display:none; position:fixed; inset:0; z-index:300; background:rgba(0,0,0,0.6); backdrop-filter:blur(12px); justify-content:center; align-items:center; padding:1rem; }
+        .confirm-overlay.active { display: flex !important; }
+        .confirm-box { background:linear-gradient(160deg, var(--bg-dark), var(--bg-card)); border:1px solid rgba(255,255,255,0.08); border-radius:1.75rem; padding:2.5rem; text-align:center; color:white; max-width:420px; width:100%; box-shadow:0 24px 60px rgba(0,0,0,0.5); animation:modalIn 0.3s cubic-bezier(0.22,1,0.36,1); }
+        @keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+        @keyframes badgePop { 0% { transform:scale(0.5) rotate(-8deg); opacity:0; } 70% { transform:scale(1.15) rotate(2deg); opacity:1; } 85% { transform:scale(0.95) rotate(-1deg); } 100% { transform:scale(1) rotate(0deg); opacity:1; } }
+        .badge-item { animation: badgePop 0.5s cubic-bezier(0.22,1,0.36,1) forwards; opacity: 0; }
+        .recyclable-chip { display:inline-flex; align-items:center; gap:0.4rem; background:rgba(var(--accent-rgb),0.08); border:1px solid rgba(var(--accent-rgb),0.2); color:var(--accent); border-radius:2rem; padding:0.4rem 0.9rem; font-size:0.78rem; font-weight:700; transition:all 0.2s ease; }
+        .recyclable-chip.disabled { background:rgba(255,255,255,0.03); border-color:rgba(255,255,255,0.06); color:#475569; text-decoration:line-through; }
+        .goal-bar-track { background:rgba(255,255,255,0.06); border-radius:999px; height:8px; overflow:hidden; }
+        .goal-bar-fill { background:linear-gradient(90deg, var(--accent), var(--accent-secondary)); border-radius:999px; height:100%; transition:width 0.8s cubic-bezier(0.22,1,0.36,1); position:relative; }
+        .goal-bar-fill::after { content:''; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation:shimmer 2s ease infinite; }
+        .eco-fact-card { background:linear-gradient(135deg, rgba(var(--accent-rgb),0.06), rgba(var(--accent-sec-rgb),0.03)); border:1px solid rgba(var(--accent-rgb),0.12); border-radius:1.25rem; padding:1rem 1.25rem; }
+        .pw-wrapper { position: relative; }
+        .pw-toggle { position:absolute; right:1.25rem; top:50%; transform:translateY(-50%); cursor:pointer; color:#64748b; background:none; border:none; padding:0; transition:color 0.2s; }
+        .pw-toggle:hover { color: var(--accent); }
+        #analyticsChart { max-height: 220px; }
+        .submit-btn { background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:1.25rem; padding:1.25rem; display:flex; flex-direction:column; align-items:center; gap:0.5rem; font-weight:800; font-size:0.8rem; text-transform:uppercase; color:#e2e8f0; transition:all 0.25s cubic-bezier(0.22,1,0.36,1); cursor:pointer; position:relative; overflow:hidden; font-family:'Inter',system-ui,sans-serif; }
+        .submit-btn:hover { background:var(--accent); color:#0f1a11; border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 24px rgba(var(--accent-rgb),0.25); }
+        .submit-btn:active { transform: scale(0.94) !important; }
+        .submit-btn .btn-icon { width:2.75rem; height:2.75rem; border-radius:0.75rem; background:rgba(var(--accent-rgb),0.1); display:flex; align-items:center; justify-content:center; transition:all 0.25s ease; }
+        .submit-btn:hover .btn-icon { background: rgba(0,0,0,0.1); }
+        .empty-state { text-align:center; padding:3rem 2rem; }
+        .empty-state-icon { width:4rem; height:4rem; margin:0 auto 1rem; background:rgba(var(--accent-rgb),0.08); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; animation:emptyBounce 3s ease-in-out infinite; }
+        @keyframes emptyBounce { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-6px); } }
+        .empty-state-cta { margin-top:1rem; display:inline-block; background:rgba(var(--accent-rgb),0.1); border:1px solid rgba(var(--accent-rgb),0.2); color:var(--accent); padding:0.5rem 1.25rem; border-radius:0.75rem; font-size:0.75rem; font-weight:700; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+        .empty-state-cta:hover { background:var(--accent); color:#0f1a11; }
+        .feature-icon-wrap { width:3.5rem; height:3.5rem; border-radius:1rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+        input:focus { box-shadow: 0 0 0 3px rgba(var(--accent-rgb),0.15); }
+        button:focus-visible { outline:2px solid rgba(var(--accent-rgb),0.5); outline-offset:2px; }
+        #scrollProgress { position:fixed; top:0; left:0; height:2px; z-index:60; background:linear-gradient(90deg, var(--accent), var(--accent-secondary)); transition:width 0.1s linear; box-shadow:0 0 8px rgba(var(--accent-rgb),0.4); }
+        .stat-mini { background:linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%); border:1px solid rgba(255,255,255,0.06); border-radius:1rem; padding:0.875rem 1rem; transition:all 0.25s ease; position:relative; overflow:visible; }
+        .stat-mini::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); }
+        .stat-mini:hover { background:rgba(255,255,255,0.07); transform:translateY(-1px); }
+        .activity-item { display:flex; align-items:center; gap:0.75rem; padding:0.625rem 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.8rem; }
+        .activity-item:last-child { border-bottom:none; }
+        .activity-dot { width:6px; height:6px; border-radius:50%; flex-shrink:0; }
+        .tooltip-wrap { position:relative; display:inline-flex; }
+        .tooltip-icon { width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); display:inline-flex; align-items:center; justify-content:center; font-size:9px; font-weight:900; color:#64748b; cursor:help; transition:all 0.2s; flex-shrink:0; }
+        .tooltip-icon:hover { background:rgba(var(--accent-rgb),0.15); color:var(--accent); border-color:rgba(var(--accent-rgb),0.3); }
+        .tooltip-bubble { display:none; position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:var(--bg-dark); border:1px solid rgba(var(--accent-rgb),0.2); border-radius:0.75rem; padding:0.625rem 0.875rem; font-size:0.7rem; color:#cbd5e1; white-space:nowrap; z-index:999; pointer-events:none; box-shadow:0 8px 24px rgba(0,0,0,0.4); font-weight:500; }
+        .tooltip-bubble::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:5px solid transparent; border-top-color:rgba(var(--accent-rgb),0.2); }
+        .tooltip-wrap:hover .tooltip-bubble { display:block; animation:tooltipIn 0.2s ease; }
+        @keyframes tooltipIn { from { opacity:0; transform:translateX(-50%) translateY(4px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+        .section-header { display:flex; align-items:center; gap:0.75rem; margin-bottom:0.75rem; }
+        .section-header-line { flex:1; height:1px; background:rgba(255,255,255,0.06); }
+        .section-header-label { font-size:0.625rem; font-weight:800; text-transform:uppercase; letter-spacing:0.15em; color:#64748b; display:flex; align-items:center; gap:0.375rem; }
+        .milestone-preview { background:linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.03)); border:1px solid rgba(251,191,36,0.12); border-radius:1rem; padding:0.875rem 1rem; }
+        .feed-item { display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1rem; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.8rem; animation:feedSlide 0.3s ease; }
+        @keyframes feedSlide { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+        .feed-item:last-child { border-bottom:none; }
+        .feed-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; animation:pulse 2s ease infinite; }
+        /* BUG FIX: onboarding uses theme bg */
+        .onboarding-overlay { display:none; position:fixed; inset:0; z-index:300; background:var(--bg-deep); backdrop-filter:blur(24px); justify-content:center; align-items:center; padding:1.5rem; }
+        .onboarding-overlay.active { display: flex !important; animation: fadeIn 0.4s ease forwards; }
+        .onboarding-step { display:none; text-align:center; max-width:460px; width:100%; animation:modalIn 0.4s cubic-bezier(0.22,1,0.36,1); }
+        .onboarding-step.active { display: block !important; }
+        .onboarding-icon { width:5rem; height:5rem; border-radius:1.5rem; background:linear-gradient(135deg, rgba(var(--accent-rgb),0.15), rgba(var(--accent-sec-rgb),0.08)); border:1px solid rgba(var(--accent-rgb),0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; font-size:2.5rem; }
+        .onboarding-dots { display:flex; gap:0.5rem; justify-content:center; margin-top:2rem; }
+        .onboarding-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.15); transition:all 0.3s; }
+        .onboarding-dot.active { background:var(--accent); width:24px; border-radius:4px; }
+        .class-emblem { width:2.5rem; height:2.5rem; border-radius:0.75rem; display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
+        .sparkline-container { height:40px; display:flex; align-items:flex-end; gap:2px; }
+        .sparkline-bar { flex:1; border-radius:2px 2px 0 0; min-width:4px; background:linear-gradient(to top, rgba(var(--accent-rgb),0.3), rgba(var(--accent-rgb),0.7)); transition:height 0.5s cubic-bezier(0.22,1,0.36,1); }
+        .glossary-link { display:inline-flex; align-items:center; gap:0.375rem; font-size:0.65rem; font-weight:600; color:#64748b; cursor:pointer; transition:color 0.2s; text-decoration:underline; text-decoration-style:dotted; text-underline-offset:3px; }
+        .glossary-link:hover { color: var(--accent); }
+        .lb-search { background:rgba(0,0,0,0.05); border:1px solid rgba(0,0,0,0.06); border-radius:0.75rem; padding:0.5rem 0.875rem; font-size:0.8rem; outline:none; transition:all 0.2s; width:100%; color:#334155; font-weight:500; font-family:'Inter',system-ui,sans-serif; }
+        .lb-search:focus { border-color:var(--accent); box-shadow:0 0 0 3px rgba(var(--accent-rgb),0.1); }
+        .lb-search::placeholder { color:#94a3b8; }
+        .lb-sort-btn { background:rgba(0,0,0,0.04); border:1px solid rgba(0,0,0,0.06); border-radius:0.5rem; padding:0.375rem 0.75rem; font-size:0.65rem; font-weight:700; text-transform:uppercase; cursor:pointer; transition:all 0.2s; color:#64748b; font-family:'Inter',system-ui,sans-serif; }
+        .lb-sort-btn:hover, .lb-sort-btn.active { background:var(--accent); color:#0f1a11; border-color:var(--accent); }
+        .dashboard-bg { position:relative; }
+        .dashboard-bg::before { content:''; position:absolute; inset:0; border-radius:inherit; background:radial-gradient(circle at 10% 20%, rgba(var(--accent-rgb),0.04), transparent 40%), radial-gradient(circle at 90% 80%, rgba(var(--accent-sec-rgb),0.03), transparent 40%); pointer-events:none; z-index:0; }
+        .dashboard-bg > * { position:relative; z-index:1; }
+        @keyframes successPop { 0% { transform:scale(0); opacity:0; } 50% { transform:scale(1.2); } 100% { transform:scale(1); opacity:1; } }
+        .success-anim { animation: successPop 0.5s cubic-bezier(0.22,1,0.36,1); }
+        .adv-period-chip { display:inline-flex; align-items:center; gap:0.5rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:0.75rem; padding:0.5rem 0.75rem; font-size:0.8rem; font-weight:700; color:#e2e8f0; transition:all 0.2s; position:relative; }
+        .adv-period-chip .chip-remove { background:rgba(239,68,68,0.15); border:none; color:#ef4444; width:20px; height:20px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:11px; font-weight:900; transition:all 0.2s; }
+        .adv-period-chip .chip-remove:hover { background:#ef4444; color:white; }
+        .emoji-picker-btn { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); border-radius:0.5rem; padding:0.25rem 0.5rem; font-size:1rem; cursor:pointer; transition:all 0.2s; line-height:1; }
+        .emoji-picker-btn:hover { background:rgba(var(--accent-rgb),0.15); border-color:rgba(var(--accent-rgb),0.3); }
+        .emoji-grid { display:grid; grid-template-columns:repeat(6, 1fr); gap:0.25rem; padding:0.5rem; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); border-radius:0.75rem; margin-top:0.375rem; }
+        .emoji-grid button { background:none; border:none; font-size:1.25rem; padding:0.375rem; border-radius:0.5rem; cursor:pointer; transition:all 0.15s; }
+        .emoji-grid button:hover { background:rgba(var(--accent-rgb),0.2); transform:scale(1.15); }
+        .recyclable-edit-btn { background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.12); color:white; width:28px; height:28px; border-radius:0.5rem; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.75rem; transition:all 0.2s; flex-shrink:0; }
+        .recyclable-edit-btn:hover { border-color:rgba(var(--accent-rgb),0.3); background:rgba(var(--accent-rgb),0.15); }
+        .recyclable-edit-btn.danger { border-color:rgba(239,68,68,0.2); background:rgba(239,68,68,0.1); }
+        .recyclable-edit-btn.danger:hover { border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.25); }
+        .accent-text { color: var(--accent); }
+        .accent-bg { background: var(--accent); }
+        .accent-border { border-color: var(--accent); }
+        .theme-picker-btn { display:flex; align-items:center; gap:0.6rem; width:100%; padding:0.65rem 0.85rem; border-radius:0.75rem; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.04); color:white; cursor:pointer; transition:all 0.2s; font-family:'Inter',system-ui,sans-serif; text-align:left; font-size:0.85rem; font-weight:700; }
+        .theme-picker-btn:hover:not(:disabled) { background:rgba(255,255,255,0.08); border-color:rgba(255,255,255,0.15); }
+        .theme-picker-btn.active-theme { background:rgba(var(--accent-rgb),0.15); border-color:rgba(var(--accent-rgb),0.3); }
+        .theme-picker-btn:disabled { opacity:0.35; cursor:not-allowed; }
+        .theme-mini-btn { display:inline-flex; align-items:center; gap:0.3rem; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:0.5rem; padding:0.3rem 0.55rem; font-size:0.65rem; font-weight:700; color:#cbd5e1; cursor:pointer; transition:all 0.2s; }
+        .theme-mini-btn:hover:not(.locked) { background:rgba(var(--accent-rgb),0.15); border-color:rgba(var(--accent-rgb),0.3); }
+        .theme-mini-btn.active-t { background:rgba(var(--accent-rgb),0.2); border-color:rgba(var(--accent-rgb),0.4); color:var(--accent); }
+        .theme-mini-btn.locked { opacity:0.3; cursor:not-allowed; }
+        @media (max-width: 768px) { .hero-title-text { font-size: 4rem !important; } }
+    </style>
+</head>
+<body class="bg-[#f8faf5] text-slate-800 font-sans theme-forest">
+<div id="mouseGlow"></div>
+<div id="toastContainer"></div>
+<div id="scrollProgress" style="width:0%"></div>
+
+<div id="onboardingOverlay" class="onboarding-overlay">
+    <div id="onboardStep1" class="onboarding-step active">
+        <div class="onboarding-icon">🎓</div>
+        <h2 class="text-3xl font-black text-white uppercase mb-3">Welcome to EcoLink</h2>
+        <p class="text-slate-400 text-base leading-relaxed mb-2">Choose how you'd like to use the platform.</p>
+        <div class="grid grid-cols-2 gap-3 mt-6 max-w-sm mx-auto">
+            <button onclick="onboardSelectRole('student')" class="p-5 rounded-2xl font-bold text-sm uppercase hover:text-black transition flex flex-col items-center gap-2 accent-text" style="background:rgba(var(--accent-rgb),0.1);border:1px solid rgba(var(--accent-rgb),0.2)"><span class="text-2xl">📚</span><span>Student / Class</span></button>
+            <button onclick="onboardSelectRole('staff')" class="bg-white/5 border border-white/10 text-white p-5 rounded-2xl font-bold text-sm uppercase hover:bg-white/15 transition flex flex-col items-center gap-2"><span class="text-2xl">🏫</span><span>Staff / Admin</span></button>
+        </div>
+        <div class="onboarding-dots"><div class="onboarding-dot active"></div><div class="onboarding-dot"></div><div class="onboarding-dot"></div></div>
+    </div>
+    <div id="onboardStep2" class="onboarding-step">
+        <div class="onboarding-icon">♻️</div>
+        <h2 class="text-3xl font-black text-white uppercase mb-3">How Points Work</h2>
+        <p class="text-slate-400 text-base leading-relaxed mb-6">Recycle items → earn points → unlock rewards for your class!</p>
+        <div class="space-y-3 max-w-sm mx-auto text-left">
+            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl"><span class="text-xl">📦</span><div><p class="text-white font-bold text-sm">Bring Items</p><p class="text-slate-500 text-xs">Bottles, cans, paper, and more</p></div></div>
+            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl"><span class="text-xl">⭐</span><div><p class="text-white font-bold text-sm">Earn Points</p><p class="text-slate-500 text-xs">Each item = points for your class pool</p></div></div>
+            <div class="flex items-center gap-3 bg-white/5 p-3 rounded-xl"><span class="text-xl">🎁</span><div><p class="text-white font-bold text-sm">Get Rewards</p><p class="text-slate-500 text-xs">Points convert and split among classmates</p></div></div>
+        </div>
+        <button onclick="onboardNext(3)" class="mt-6 accent-bg text-black px-8 py-3.5 rounded-xl font-bold text-sm uppercase shadow-lg hover:opacity-90 transition">Continue</button>
+        <div class="onboarding-dots"><div class="onboarding-dot"></div><div class="onboarding-dot active"></div><div class="onboarding-dot"></div></div>
+    </div>
+    <div id="onboardStep3" class="onboarding-step">
+        <div class="onboarding-icon">🔑</div>
+        <h2 class="text-3xl font-black text-white uppercase mb-3">Enter Your Code</h2>
+        <p class="text-slate-400 text-base leading-relaxed mb-6" id="onboardStep3Desc">Your teacher will provide a 6-digit class code.</p>
+        <div class="max-w-sm mx-auto">
+            <input type="text" id="onboardCodeInput" placeholder="000000" maxlength="6" class="w-full bg-black/30 border border-white/8 p-5 rounded-xl mb-4 text-center text-2xl font-black tracking-[0.3em] accent-text uppercase outline-none transition">
+            <button onclick="onboardFinish()" class="w-full accent-bg text-black font-bold py-4 rounded-xl text-base uppercase shadow-lg hover:opacity-90 transition">Let's Go!</button>
+        </div>
+        <button onclick="skipOnboarding()" class="mt-4 text-slate-600 font-semibold text-sm hover:text-white transition">Skip for now</button>
+        <div class="onboarding-dots"><div class="onboarding-dot"></div><div class="onboarding-dot"></div><div class="onboarding-dot active"></div></div>
+    </div>
+</div>
+
+<div id="styledModalOverlay" class="modal-overlay">
+    <div class="modal-box" id="styledModalBox">
+        <div class="text-center mb-5"><div class="text-3xl mb-2" id="modalEmoji">📝</div><h3 class="text-xl font-black uppercase text-white" id="modalTitle">Form</h3><p class="text-slate-500 text-sm mt-1 modal-subtitle" id="modalSubtitle"></p></div>
+        <div id="modalFieldsContainer"></div>
+        <div class="modal-actions"><button class="modal-btn-cancel" onclick="closeStyledModal()">Cancel</button><button class="modal-btn-primary" id="modalSubmitBtn" onclick="submitStyledModal()">Confirm</button></div>
+    </div>
+</div>
+
+<div id="impactSummaryOverlay" class="modal-overlay" style="z-index:250">
+    <div class="modal-box" style="max-width:400px; text-align:center;">
+        <div class="text-5xl mb-3 success-anim" id="impactSummaryEmoji">✅</div>
+        <h3 class="text-xl font-black uppercase text-white mb-1" id="impactSummaryTitle">Items Logged!</h3>
+        <p class="text-slate-500 text-sm mb-5" id="impactSummarySubtitle">Great work recycling!</p>
+        <div id="impactSummaryContent" class="space-y-3 mb-5"></div>
+        <button onclick="confettiThenClose()" class="w-14 h-14 rounded-full accent-bg text-black font-black text-xs uppercase mx-auto flex items-center justify-center shadow-lg hover:opacity-90 transition" id="impactCheckBtn">✓</button>
+    </div>
+</div>
+
+<div id="glossaryOverlay" class="modal-overlay" style="z-index:210">
+    <div class="modal-box" style="max-width:440px;">
+        <div class="text-center mb-5"><div class="text-3xl mb-2">📖</div><h3 class="text-xl font-black uppercase text-white">Glossary</h3><p class="text-slate-500 text-sm mt-1 modal-subtitle">What do these terms mean?</p></div>
+        <div class="space-y-3">
+            <div class="bg-white/5 rounded-xl p-3"><p class="accent-text font-bold text-sm">Points</p><p class="text-slate-400 text-xs leading-relaxed">Earned by recycling items. Points accumulate in your class pool and convert to rewards at a threshold.</p></div>
+            <div class="bg-white/5 rounded-xl p-3"><p class="text-amber-400 font-bold text-sm">Class Pool</p><p class="text-slate-400 text-xs leading-relaxed">The total reward currency your class has earned. This is split evenly among all students.</p></div>
+            <div class="bg-white/5 rounded-xl p-3"><p class="text-white font-bold text-sm">Lifetime</p><p class="text-slate-400 text-xs leading-relaxed">The total number of items your class has ever recycled.</p></div>
+            <div class="bg-white/5 rounded-xl p-3"><p class="text-white font-bold text-sm">Threshold</p><p class="text-slate-400 text-xs leading-relaxed">The point target that triggers automatic conversion to reward currency.</p></div>
+            <div class="bg-white/5 rounded-xl p-3"><p class="text-white font-bold text-sm">Streak</p><p class="text-slate-400 text-xs leading-relaxed">Consecutive days your class has submitted items.</p></div>
+        </div>
+        <div class="modal-actions"><button class="modal-btn-cancel" onclick="document.getElementById('glossaryOverlay').classList.remove('active')" style="flex:1">Got it!</button></div>
+    </div>
+</div>
+
+<div id="confirmOverlay" class="confirm-overlay">
+    <div class="confirm-box">
+        <div class="text-4xl mb-3" id="confirmEmoji">♻️</div>
+        <h3 class="text-lg font-black uppercase mb-1.5" id="confirmTitle">Are you sure?</h3>
+        <p class="text-slate-400 text-sm mb-4 leading-relaxed" id="confirmMsg"></p>
+        <div id="confirmSummaryDetails" class="text-left mb-5 hidden"></div>
+        <div class="flex gap-3"><button onclick="confirmAction(false)" class="flex-1 bg-white/8 text-white font-bold py-3.5 rounded-xl uppercase text-sm hover:bg-white/15 transition">Cancel</button><button onclick="confirmAction(true)" class="flex-1 accent-bg text-black font-bold py-3.5 rounded-xl uppercase text-sm hover:opacity-90 transition" id="confirmBtn">Confirm</button></div>
+    </div>
+</div>
+
+<div id="recyclablesOverlay" class="confirm-overlay">
+    <div class="confirm-box" style="max-width:520px">
+        <div class="text-3xl mb-2">♻️</div>
+        <h3 class="text-xl font-black uppercase mb-1 accent-text">What Can We Recycle?</h3>
+        <p class="text-slate-500 text-xs uppercase tracking-widest mb-5" id="recyclablesSchoolName">School Recycling Guidelines</p>
+        <div id="recyclablesGrid" class="flex flex-wrap gap-2 mb-6 justify-center"></div>
+        <button onclick="closeRecyclables()" class="w-full bg-white/8 text-white font-bold py-3.5 rounded-xl uppercase text-sm hover:bg-white/15 transition">Close</button>
+    </div>
+</div>
+
+<div id="advancedSettingsOverlay" class="modal-overlay" style="z-index:205">
+    <div class="modal-box" style="max-width:520px;max-height:85vh;display:flex;flex-direction:column;">
+        <div class="text-center mb-5 flex-shrink-0"><div class="text-3xl mb-2">⚙️</div><h3 class="text-xl font-black uppercase text-white">Advanced Settings</h3><p class="text-slate-500 text-sm mt-1 modal-subtitle">Manage your periods and preferences</p></div>
+        <div class="mb-4 flex-1 overflow-y-auto" style="min-height:0;">
+            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Your Periods</p>
+            <p class="text-[10px] text-slate-600 mb-3">Add or remove specific period numbers. Click the emoji to change each period's icon.</p>
+            <div id="advSettingsPeriodList" class="flex flex-wrap gap-2 mb-4" style="max-height:40vh;overflow-y:auto;padding-right:4px;"></div>
+            <div class="flex gap-2"><input type="text" id="advSettingsNewPeriod" placeholder="e.g. 4 or Advisory" class="flex-1 bg-black/30 border border-white/8 p-3 rounded-lg text-white text-sm outline-none transition" onkeydown="if(event.key==='Enter')advSettingsAddPeriod()"><button onclick="advSettingsAddPeriod()" class="accent-bg text-black px-4 py-3 rounded-lg font-bold text-xs uppercase hover:opacity-90 transition">+ Add</button></div>
+        </div>
+        <div class="modal-actions flex-shrink-0"><button class="modal-btn-cancel" onclick="closeAdvancedSettings()">Done</button></div>
+    </div>
+</div>
+
+<!-- BUG FIX: Recyclables editor now uses z-index 210 modal-overlay so confirm (z-index 300) appears on top -->
+<div id="recyclablesEditorOverlay" class="modal-overlay" style="z-index:210">
+    <div class="modal-box" style="max-width:520px;">
+        <div class="text-center mb-4"><h3 class="text-xl font-black uppercase text-amber-400">Manage Recyclables</h3><p class="text-slate-500 text-xs mt-1">Toggle, edit emoji, or delete any item — including defaults.</p></div>
+        <div id="recyclablesEditorGrid" class="flex flex-wrap gap-2 mb-5"></div>
+        <div class="flex gap-2 mb-3"><input type="text" id="newRecyclableInput" placeholder="Add custom item..." class="flex-1 bg-black/30 border border-white/8 p-3 rounded-lg text-white text-sm focus:border-amber-400 outline-none transition" onkeydown="if(event.key==='Enter')addCustomRecyclable()"><button onclick="addCustomRecyclable()" class="bg-amber-400 text-black px-4 py-3 rounded-lg font-bold text-xs uppercase">Add</button></div>
+        <div id="recyclableEmojiPicker" class="hidden mb-4"><p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Pick an emoji for: <span id="recyclableEmojiTarget" class="text-white"></span></p><div class="emoji-grid" style="position:relative;"></div></div>
+        <button onclick="closeRecyclablesEditor()" class="w-full bg-white/8 text-white font-bold py-3.5 rounded-xl uppercase text-sm hover:bg-white/15 transition">Save & Close</button>
+    </div>
+</div>
+
+<!-- Theme Picker (teacher + student shared overlay) -->
+<div id="themePickerOverlay" class="modal-overlay" style="z-index:210">
+    <div class="modal-box" style="max-width:460px;">
+        <div class="text-center mb-5"><div class="text-3xl mb-2">🎨</div><h3 class="text-xl font-black uppercase text-white" id="themePickerTitle">Choose Theme</h3><p class="text-slate-500 text-sm mt-1 modal-subtitle" id="themePickerSubtitle">Pick a theme for your class.</p></div>
+        <div id="themePickerGrid" class="space-y-2 mb-4"></div>
+        <p class="text-[10px] text-slate-500 text-center mb-4" id="themePickerHint"></p>
+        <div class="modal-actions"><button class="modal-btn-cancel" onclick="closeThemePicker()">Done</button></div>
+    </div>
+</div>
+
+<nav id="mainNav" class="fixed w-full z-50 border-b border-white/5 py-4 px-6 md:px-8 flex justify-between items-center text-white">
+    <div class="flex items-center gap-3 cursor-pointer group" onclick="window.scrollTo(0,0)"><div class="accent-bg p-2 rounded-xl text-[#0f1a11] group-hover:scale-110 transition-transform"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="text-xl font-black tracking-tight uppercase">EcoLink</span></div>
+    <div class="hidden md:flex gap-8 text-[13px] font-semibold uppercase tracking-widest text-slate-400"><a href="#how-it-works" class="hover:accent-text transition">How It Works</a><a href="#leaderboard" class="hover:accent-text transition">Leaderboards</a><a href="#mission" class="hover:accent-text transition">Our Mission</a><a href="https://pbisrstudent.navigate360.com/login.php" target="_blank" class="accent-text hover:opacity-80 transition">Reward Shop ↗</a></div>
+    <button onclick="openLoginModal()" class="accent-bg text-black px-5 py-2.5 rounded-xl font-bold text-sm uppercase hover:opacity-90 transition-all shadow-lg">Login</button>
+</nav>
+
+<header class="eco-gradient min-h-screen flex items-center pt-24 pb-16 px-6 md:px-8 text-white relative">
+    <div class="aurora"></div><canvas id="leaf-canvas"></canvas>
+    <div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 lg:gap-20 items-center w-full">
+        <div>
+            <span class="hero-badge accent-text font-semibold tracking-[0.3em] uppercase text-xs inline-flex items-center gap-2 mb-6"><span class="pulse-dot"></span>Inter-School Initiative</span>
+            <h1 class="hero-title hero-title-text text-7xl md:text-8xl lg:text-9xl font-black leading-[0.85] uppercase italic">Recycle.<br><span class="gradient-text">Earn.</span></h1>
+            <p class="hero-sub text-slate-400 text-lg md:text-xl mt-6 max-w-md leading-relaxed font-medium">Classrooms compete, earn rewards, and make a real environmental impact — together.</p>
+            <div class="hero-stat mt-8 p-6 rounded-2xl bg-white/5 border border-white/8 w-full stat-box"><p class="accent-text text-[10px] font-bold uppercase tracking-[0.25em] mb-1.5">Network Impact</p><div class="flex items-baseline gap-2"><span id="totalImpact" class="text-5xl md:text-6xl font-black">0</span><span class="text-slate-500 font-semibold uppercase text-sm tracking-wider">Items Saved</span></div></div>
+            <div class="hero-btns mt-10 flex flex-wrap gap-4 w-full"><button onclick="openLoginModal('student')" class="btn-glow accent-bg text-black px-8 py-4 rounded-xl font-black text-base uppercase shadow-xl flex-1 min-w-[140px]">Class Portal</button><a href="https://pbisrstudent.navigate360.com/login.php" target="_blank" class="btn-glow bg-white/8 border border-white/12 text-white px-8 py-4 rounded-xl font-bold text-base uppercase flex items-center justify-center gap-2.5 hover:bg-white/12 transition flex-1 min-w-[140px]"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>PBIS Store</a></div>
+        </div>
+        <div class="hidden md:block hero-card"><div class="glass border border-white/8 p-10 rounded-[2.5rem] text-center shadow-2xl card-hover"><div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style="background:rgba(var(--accent-rgb),0.15)"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-text"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><h3 class="text-2xl font-black mb-3 uppercase text-white">Teamwork Pays Off</h3><p class="text-slate-400 text-base mb-6 leading-relaxed">Pool your impact as a classroom! Once your class reaches the target points, the currency is converted and split among everyone.</p><div class="flex justify-center gap-1.5"><div class="h-1 w-8 accent-bg rounded-full"></div><div class="h-1 w-3 rounded-full" style="background:rgba(var(--accent-rgb),0.4)"></div><div class="h-1 w-3 rounded-full" style="background:rgba(var(--accent-rgb),0.2)"></div></div></div></div>
+    </div>
+</header>
+
+<section id="how-it-works" class="py-24 px-6 md:px-8 section-light">
+    <div class="max-w-4xl mx-auto">
+        <div class="text-center mb-14 reveal"><p class="text-lime-600 font-bold text-xs uppercase tracking-[0.3em] mb-3">Simple & Rewarding</p><h2 class="text-4xl md:text-5xl font-black uppercase tracking-tight text-slate-900">How It Works</h2></div>
+        <div class="grid md:grid-cols-3 gap-8 stagger-children">
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover"><div class="feature-icon-wrap bg-lime-50 text-lime-600 mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div><h4 class="font-black text-base uppercase mb-2 text-slate-900">1. Collect & Log</h4><p class="text-slate-500 text-sm leading-relaxed">Bring recyclable items to class and log them through your class portal using your 6-digit code.</p></div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover"><div class="feature-icon-wrap bg-amber-50 text-amber-600 mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg></div><h4 class="font-black text-base uppercase mb-2 text-slate-900">2. Earn Points</h4><p class="text-slate-500 text-sm leading-relaxed">Every item earns points for your class pool. Hit the threshold and your points convert to rewards automatically.</p></div>
+            <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 card-hover"><div class="feature-icon-wrap bg-emerald-50 text-emerald-600 mb-4"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C7 4 9 7 12 7s5-3 7.5-3a2.5 2.5 0 0 1 0 5H18"/><path d="M6 15h12"/><path d="M6 9v12"/><path d="M18 9v12"/></svg></div><h4 class="font-black text-base uppercase mb-2 text-slate-900">3. Share Rewards</h4><p class="text-slate-500 text-sm leading-relaxed">Rewards are split evenly among all students. The more your class recycles, the more everyone earns!</p></div>
+        </div>
+    </div>
+</section>
+
+<section id="leaderboard" class="py-24 px-6 md:px-8 bg-white">
+    <div class="max-w-7xl mx-auto">
+        <div class="text-center mb-12 reveal"><p class="text-lime-600 font-bold text-xs uppercase tracking-[0.3em] mb-3">Competition</p><h2 class="text-4xl md:text-5xl font-black uppercase tracking-tight text-slate-900">Leaderboards</h2></div>
+        <div class="grid md:grid-cols-2 gap-8">
+            <div class="reveal-left"><div class="flex items-center justify-between mb-3"><h3 class="text-lg font-black uppercase text-slate-900">School Rankings</h3><div class="flex gap-1.5"><button class="lb-sort-btn active" onclick="sortSchoolLB('lifetime',this)">All-Time</button><button class="lb-sort-btn" onclick="sortSchoolLB('recent',this)">Recent</button></div></div><input type="text" class="lb-search mb-3" placeholder="🔍  Search schools..." oninput="filterSchoolLB(this.value)"><div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden card-hover"><div class="p-5 pb-3 flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] border-b border-slate-50"><span>Rank & School</span><span>Total Items</span></div><div id="schoolLeaderboardList" class="p-1.5 space-y-0.5 stagger-children"></div></div></div>
+            <div class="reveal-right"><div class="flex items-center justify-between mb-3"><h3 class="text-lg font-black uppercase text-slate-900">Top Classrooms</h3><div class="flex gap-1.5"><button class="lb-sort-btn active" onclick="sortClassLB('lifetime',this)">Lifetime</button><button class="lb-sort-btn" onclick="sortClassLB('current',this)">Current</button></div></div><input type="text" class="lb-search mb-3" placeholder="🔍  Search classes..." oninput="filterClassLB(this.value)"><div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden card-hover"><div class="p-5 pb-3 flex justify-between text-[10px] font-bold text-slate-400 uppercase tracking-[0.15em] border-b border-slate-50"><span>Rank & Class</span><span>Points</span></div><div id="publicLeaderboardList" class="p-1.5 space-y-0.5 stagger-children"></div></div></div>
+        </div>
+        <div class="mt-12 reveal"><div class="text-center mb-6"><h3 class="text-lg font-black uppercase text-slate-900">Recent Activity</h3><p class="text-slate-400 text-xs font-medium mt-1">Live updates from across the network</p></div><div class="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden max-w-2xl mx-auto"><div id="networkActivityFeed" class="max-h-64 overflow-y-auto"></div></div></div>
+    </div>
+</section>
+
+<section id="mission" class="py-28 px-6 md:px-8 mission-bg border-y border-slate-100">
+    <div class="max-w-5xl mx-auto"><div class="grid md:grid-cols-5 gap-12 items-start">
+        <div class="md:col-span-3 reveal-left"><p class="text-lime-600 font-bold text-xs uppercase tracking-[0.3em] mb-4">Why We Exist</p><h2 class="text-4xl md:text-5xl font-black uppercase tracking-tight mb-8">Our Mission & <span class="text-lime-500">Vision</span></h2><div class="space-y-6 text-lg text-slate-600 leading-relaxed"><p>At <span class="text-slate-900 font-bold">EcoLink</span>, we recognize that the future belongs to those who care for it today. This initiative is more than just a recycling program — it is a leadership platform designed to foster a deep sense of environmental responsibility.</p><p>Our primary goal is to transform "waste" into opportunity. By gamifying the process of sustainability across our entire school network, we encourage students to develop lifelong habits of conservation as a team.</p></div></div>
+        <div class="md:col-span-2 reveal-right"><div class="bg-slate-50 p-8 rounded-2xl border border-slate-100 shadow-sm card-hover"><h4 class="text-base font-black uppercase mb-5 text-lime-600">Core Values</h4><ul class="space-y-5"><li class="flex items-start gap-3"><div class="bg-lime-400/15 p-2 rounded-lg text-lime-600 mt-0.5 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><div><p class="font-bold text-sm text-slate-900 mb-0.5">Integrity</p><p class="text-xs text-slate-500 leading-relaxed">Submitting your class impact honestly for teacher review.</p></div></li><li class="flex items-start gap-3"><div class="bg-lime-400/15 p-2 rounded-lg text-lime-600 mt-0.5 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div><p class="font-bold text-sm text-slate-900 mb-0.5">Teamwork</p><p class="text-xs text-slate-500 leading-relaxed">Classrooms share accounts and pool their impact for maximum reward.</p></div></li><li class="flex items-start gap-3"><div class="bg-lime-400/15 p-2 rounded-lg text-lime-600 mt-0.5 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg></div><div><p class="font-bold text-sm text-slate-900 mb-0.5">Global Impact</p><p class="text-xs text-slate-500 leading-relaxed">Every item saved contributes to a network-wide environmental movement.</p></div></li></ul></div></div>
+    </div></div>
+</section>
+
+<footer id="contact" class="text-white py-20 px-6 md:px-8" style="background:var(--footer-bg)">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-12">
+        <div class="md:col-span-2 reveal-left"><div class="flex items-center gap-2.5 mb-4"><div class="accent-bg p-1.5 rounded-lg text-[#0f1a11]"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg></div><span class="text-lg font-black uppercase">EcoLink</span></div><p class="text-slate-400 text-base mb-6 max-w-md leading-relaxed">Empowering schools across the district. Visit your local school office for inquiries regarding point conversions.</p><p class="text-slate-700 font-semibold text-xs uppercase tracking-widest">© 2026 EcoLink Initiative</p></div>
+        <div class="flex flex-col justify-end md:items-end reveal-right"><button onclick="openLoginModal('admin')" class="bg-white/5 border border-white/8 text-white hover:accent-bg hover:text-black transition-all px-8 py-4 rounded-xl font-bold text-sm uppercase tracking-wider mb-4">Staff & Admin Access</button><a href="#how-it-works" class="text-slate-500 hover:accent-text transition text-sm font-semibold">Learn how it works ↑</a></div>
+    </div>
+</footer>
+
+<div id="portalOverlay" class="portal-overlay">
+    <div id="loginModal" class="portal-container p-7 md:p-10 rounded-[2rem] border border-white/8 text-center text-white shadow-2xl" style="background:var(--bg-card)">
+        <div class="mb-6"><div class="w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4" style="background:rgba(var(--accent-rgb),0.15)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="accent-text"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></div><h2 class="text-2xl font-black uppercase tracking-tight">Sign In</h2><p class="text-slate-500 text-sm mt-1">Choose your portal to get started</p></div>
+        <div class="flex gap-1.5 mb-6 bg-black/30 p-1.5 rounded-xl"><button onclick="switchLoginTab('student')" id="tab-student" class="flex-1 py-2.5 rounded-lg font-bold text-xs uppercase transition accent-bg text-black">Class</button><button onclick="switchLoginTab('teacher')" id="tab-teacher" class="flex-1 py-2.5 rounded-lg font-bold text-xs uppercase transition text-slate-400 hover:text-white">Teacher</button><button onclick="switchLoginTab('school')" id="tab-school" class="flex-1 py-2.5 rounded-lg font-bold text-xs uppercase transition text-slate-400 hover:text-white">Staff</button><button onclick="switchLoginTab('admin')" id="tab-admin" class="flex-1 py-2.5 rounded-lg font-bold text-xs uppercase transition text-slate-400 hover:text-white">Net</button></div>
+        <div id="login-student" class="login-pane"><p class="text-slate-500 text-xs mb-3 font-medium">Enter your 6-digit class code</p><input type="text" id="loginClassCode" placeholder="000000" maxlength="6" class="w-full bg-black/30 border border-white/8 p-5 rounded-xl mb-4 text-center text-2xl font-black tracking-[0.3em] accent-text uppercase outline-none transition"><button onclick="authClass()" class="w-full accent-bg text-black font-bold py-4 rounded-xl text-base uppercase shadow-lg hover:opacity-90 transition">Enter Class</button></div>
+        <div id="login-teacher" class="login-pane hidden"><p class="text-slate-500 text-xs mb-3 font-medium">Enter your teacher access code</p><input type="text" id="loginTeacherCode" placeholder="TEACHER CODE" class="w-full bg-black/30 border border-white/8 p-5 rounded-xl mb-4 text-center text-xl font-black tracking-widest text-white uppercase outline-none transition"><button onclick="authTeacher()" class="w-full bg-white text-black font-bold py-4 rounded-xl text-base uppercase shadow-lg hover:bg-slate-100 transition">Unlock Dashboard</button></div>
+        <div id="login-school" class="login-pane hidden"><p class="text-slate-500 text-xs mb-3 font-medium">Enter your staff access code</p><div class="pw-wrapper mb-4"><input type="password" id="loginSchoolCode" placeholder="STAFF CODE" class="w-full bg-black/30 border border-white/8 p-5 rounded-xl text-center text-xl font-black tracking-widest text-white uppercase focus:border-amber-400 outline-none transition"><button class="pw-toggle" onclick="togglePw('loginSchoolCode',this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><button onclick="authSchool()" class="w-full bg-amber-400 text-black font-bold py-4 rounded-xl text-base uppercase shadow-lg hover:bg-amber-300 transition">Manage School</button></div>
+        <div id="login-admin" class="login-pane hidden"><p class="text-slate-500 text-xs mb-3 font-medium">Network administrator access</p><div class="pw-wrapper mb-4"><input type="password" id="loginAdminPass" placeholder="NETWORK PASSWORD" class="w-full bg-black/30 border border-white/8 p-5 rounded-xl text-center text-lg font-black tracking-widest text-white uppercase focus:border-red-400 outline-none transition"><button class="pw-toggle" onclick="togglePw('loginAdminPass',this)" tabindex="-1"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button></div><button onclick="authAdmin()" class="w-full bg-red-500 text-white font-bold py-4 rounded-xl text-base uppercase shadow-lg hover:bg-red-400 transition">Access Network</button></div>
+        <div class="mt-5 flex items-center justify-center gap-4"><button onclick="hidePortal()" class="text-slate-600 font-semibold text-sm hover:text-white transition inline-flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Cancel</button><span class="text-slate-700">|</span><button onclick="showOnboarding()" class="text-slate-600 font-semibold text-sm hover:accent-text transition">New here? Quick tour</button></div>
+    </div>
+
+    <div id="studentDashboard" class="portal-container dashboard-bg p-6 md:p-8 rounded-[2rem] border border-white/8 text-white shadow-2xl max-h-[90vh] overflow-y-auto" style="background:var(--bg-card)">
+        <div class="flex justify-between items-start mb-5"><div class="flex items-center gap-3"><div id="classEmblem" class="class-emblem" style="background:rgba(var(--accent-rgb),0.15)">🌿</div><div><h3 class="text-xl font-black uppercase" id="classNameDisplay">Class Name</h3><p class="text-xs text-slate-500 font-medium mt-0.5" id="classInfoDisplay">Teacher | School</p></div></div><div class="flex gap-2 items-center"><button onclick="openRecyclables()" title="What can I recycle?" class="bg-white/6 p-2.5 rounded-xl hover:accent-bg hover:text-black transition text-sm">♻️</button><button onclick="document.getElementById('glossaryOverlay').classList.add('active')" title="Glossary" class="bg-white/6 p-2.5 rounded-xl hover:bg-white/12 transition text-sm">📖</button></div></div>
+        <div class="section-header"><span class="section-header-label">📊 Summary</span><div class="section-header-line"></div></div>
+        <div class="grid grid-cols-2 gap-3 mb-5"><div class="stat-mini glass-card rounded-xl"><div class="flex items-center gap-1.5 mb-0.5"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Class Pool</p><span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-bubble">Total reward currency your class has earned</span></span></div><p class="text-2xl font-black accent-text" id="userColts">0</p><p class="text-[10px] text-slate-600 font-medium" id="perStudentSplit">Est. 0/stu</p></div><div class="stat-mini glass-card rounded-xl"><div class="flex items-center gap-1.5 mb-0.5"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Streak</p><span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-bubble">Consecutive days your class submitted items</span></span></div><p class="text-2xl font-black text-amber-400" id="streakDisplay">🔥 0</p><p class="text-[10px] text-slate-600 font-medium">days active</p></div></div>
+        <div id="nextMilestoneSection" class="milestone-preview mb-5"><div class="flex items-center justify-between"><div><p class="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-0.5">🏆 Next Milestone</p><p class="text-sm font-bold text-white" id="nextMilestoneLabel">—</p></div><div class="text-right"><p class="text-[10px] text-slate-500 font-medium" id="nextMilestoneItems">—</p><p class="text-[10px] text-slate-500 font-medium" id="nextMilestoneReward">—</p></div></div></div>
+        <div class="eco-fact-card mb-5"><p class="text-[10px] font-bold accent-text uppercase tracking-[0.2em] mb-1">🌿 Daily Eco Fact</p><p class="text-sm text-slate-300 leading-relaxed" id="ecoFactText">Loading...</p></div>
+        <div id="goalSection" class="hidden mb-5 bg-black/20 border border-white/6 rounded-xl p-4"><div class="flex justify-between items-center mb-2"><div class="flex items-center gap-1.5"><p class="text-xs font-bold text-white uppercase tracking-wider" id="goalLabel">Class Goal</p></div><p class="text-xs font-bold accent-text" id="goalProgress">0 / 0</p></div><div class="goal-bar-track"><div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div></div><p class="text-[10px] text-slate-500 font-medium mt-1.5" id="goalReward"></p></div>
+        <div class="section-header"><span class="section-header-label">⭐ Progress</span><div class="section-header-line"></div><span class="glossary-link" onclick="document.getElementById('glossaryOverlay').classList.add('active')">What do these mean?</span></div>
+        <div class="flex justify-center mb-5"><div class="relative" style="width:176px;height:176px;"><svg width="176" height="176" class="-rotate-90"><circle cx="88" cy="88" r="80" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="14"/><circle id="progressBar" cx="88" cy="88" r="80" fill="none" stroke="url(#progressGradient)" stroke-width="14" class="circle-progress" stroke-dasharray="502.6" stroke-dashoffset="502.6"/><defs><linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:var(--accent)"/><stop offset="100%" style="stop-color:var(--accent-secondary)"/></linearGradient></defs></svg><div class="absolute inset-0 flex flex-col items-center justify-center text-center"><span id="scoreDisplay" class="text-4xl font-black">0</span><span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Points</span></div></div></div>
+        <div class="section-header"><span class="section-header-label">♻️ Actions</span><div class="section-header-line"></div></div>
+        <div class="grid grid-cols-4 gap-2.5 mb-5"><button onclick="requestSubmit(1)" class="submit-btn"><div class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div><span>+1</span></button><button onclick="requestSubmit(3)" class="submit-btn"><div class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span>+3</span></button><button onclick="requestSubmit(5)" class="submit-btn"><div class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><span>+5</span></button><button onclick="requestCustomSubmit()" class="submit-btn"><div class="btn-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></div><span>Custom</span></button></div>
+        <div class="section-header"><span class="section-header-label">📈 This Week</span><div class="section-header-line"></div></div>
+        <div class="glass-card rounded-xl p-4 mb-5"><div class="flex justify-between items-center mb-2"><p class="text-xs font-bold text-slate-400">Weekly Submissions</p><p class="text-[10px] text-slate-600 font-medium" id="sparklineTotal">0 items this week</p></div><div id="studentSparkline" class="sparkline-container"></div><div class="flex justify-between mt-1.5"><span class="text-[9px] text-slate-600">Mon</span><span class="text-[9px] text-slate-600">Tue</span><span class="text-[9px] text-slate-600">Wed</span><span class="text-[9px] text-slate-600">Thu</span><span class="text-[9px] text-slate-600">Fri</span><span class="text-[9px] text-slate-600">Sat</span><span class="text-[9px] text-slate-600">Sun</span></div></div>
+        <div class="section-header"><span class="section-header-label">🏅 Milestones</span><div class="section-header-line"></div></div>
+        <div id="badgesSection" class="mb-3"><div id="badgesList" class="flex flex-wrap gap-2"></div></div>
+        <div id="themeUnlockNote" class="bg-black/20 border border-white/6 rounded-xl p-3 mb-5"><p class="text-[10px] text-slate-400 leading-relaxed">🎨 <strong class="accent-text">Theme Unlocks:</strong> The more badges your class earns as a team, the more themes your teacher can choose from! Every <strong class="text-white">5 badges</strong> = 1 new theme. Keep collecting as a class!</p><div id="studentThemeMiniGrid" class="flex flex-wrap gap-1.5 mt-2"></div></div>
+        <div class="section-header"><span class="section-header-label">📋 Recent Activity</span><div class="section-header-line"></div></div>
+        <div id="activitySection" class="mb-5"><div id="activityList" class="bg-black/20 rounded-xl p-3"></div></div>
+        <button onclick="location.reload()" class="w-full text-slate-600 font-semibold text-xs uppercase tracking-wider hover:text-white transition py-3">Sign Out</button>
+    </div>
+
+    <div id="teacherDashboard" class="portal-container dashboard-bg p-6 md:p-8 rounded-[2rem] border border-white/8 text-white shadow-2xl w-[95%] max-w-4xl max-h-[90vh] overflow-y-auto" style="background:var(--bg-card)">
+        <div class="flex justify-between items-start mb-5"><div><p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Teacher Dashboard</p><h2 class="text-2xl font-black uppercase text-white" id="teacherNameDisplay">Teacher Name</h2><p class="text-sm font-medium text-slate-500" id="teacherSchoolDisplay">School Name</p></div><div class="flex gap-2 items-center flex-wrap justify-end"><button onclick="openThemePicker('teacher')" class="bg-white/6 px-3 py-2 rounded-lg font-bold text-xs uppercase hover:bg-white/12 transition flex items-center gap-1.5">🎨 <span class="hidden sm:inline">Theme</span></button><button onclick="openRecyclables(true)" class="bg-white/6 px-3 py-2 rounded-lg font-bold text-xs uppercase hover:accent-bg hover:text-black transition flex items-center gap-1.5">♻️ <span class="hidden sm:inline">Recyclables</span></button><button onclick="exportTeacherCSV()" class="bg-white/6 px-3 py-2 rounded-lg font-bold text-xs uppercase hover:bg-white/12 transition flex items-center gap-1.5">📥 <span class="hidden sm:inline">Export</span></button><button onclick="teacherAdvancedSettings()" class="bg-white/6 px-3 py-2 rounded-lg font-bold text-xs uppercase hover:bg-white/12 transition flex items-center gap-1.5">⚙️ <span class="hidden sm:inline">Settings</span></button><div class="border px-4 py-2 rounded-xl text-right" style="background:rgba(var(--accent-rgb),0.15);border-color:rgba(var(--accent-rgb),0.2)"><p class="text-[10px] font-bold accent-text uppercase tracking-wider">Total Impact</p><p class="text-2xl font-black text-white" id="teacherTotalImpactDisplay">0</p></div></div></div>
+        <div id="teacherPeriodTabs" class="flex gap-2 overflow-x-auto tab-scroll pb-3 mb-5"></div>
+        <div class="bg-black/20 border border-white/6 rounded-2xl p-6" id="activePeriodContainer"></div>
+        <button onclick="location.reload()" class="w-full mt-6 bg-white/4 hover:bg-white/8 py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition">Sign Out</button>
+    </div>
+
+    <div id="schoolDashboard" class="portal-container dashboard-bg p-6 md:p-8 rounded-[2rem] border border-amber-400/20 text-white shadow-2xl w-[95%] max-w-4xl max-h-[90vh] overflow-y-auto" style="background:var(--bg-card)">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4"><div><p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Staff Portal</p><h2 class="text-2xl font-black uppercase text-amber-400" id="staffSchoolName">School Name</h2></div><div class="flex flex-wrap gap-2"><button onclick="staffAddTeacher()" class="bg-amber-400 text-black px-4 py-2 rounded-lg font-bold text-xs uppercase hover:bg-amber-300 transition">+ Teacher</button><button onclick="openRecyclablesEditor()" class="bg-white/6 px-4 py-2 rounded-lg font-bold text-xs uppercase hover:bg-white/12 transition flex items-center gap-1.5">♻️ Items</button><button onclick="exportSchoolCSV()" class="bg-white/6 px-4 py-2 rounded-lg font-bold text-xs uppercase hover:bg-white/12 transition flex items-center gap-1.5">📥 Export</button></div></div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6"><div class="stat-mini glass-card rounded-xl"><div class="flex items-center gap-1.5 mb-0.5"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Conversion</p><span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-bubble">How points convert to reward currency</span></span></div><p class="text-base font-black text-white" id="schoolRewardDisplay"></p></div><div class="stat-mini glass-card rounded-xl"><div class="flex items-center gap-1.5 mb-0.5"><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Impact Rule</p><span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-bubble">How many items earn 5 points</span></span></div><p class="text-base font-black accent-text" id="schoolItemRatioDisplay"></p></div><div class="stat-mini flex items-center justify-center"><button onclick="staffEditReward()" class="text-xs font-bold uppercase text-slate-400 hover:text-white transition flex items-center gap-1.5"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Edit Rules</button></div></div>
+        <div class="bg-black/20 border border-white/6 rounded-2xl p-5 mb-6"><p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">📊 Impact Analytics</p><canvas id="analyticsChart"></canvas><div class="text-center py-8" id="analyticsEmpty" style="display:none"><div class="empty-state-icon"><span>📊</span></div><p class="text-slate-500 text-sm font-semibold">No data yet</p></div></div>
+        <div class="bg-black/20 rounded-2xl border border-white/5 overflow-hidden"><table class="w-full text-left"><tr class="text-slate-500 uppercase font-bold border-b border-white/6 text-[10px] tracking-wider bg-black/30"><th class="py-3 px-5">Teacher</th><th class="py-3 px-5 hidden sm:table-cell">Code</th><th class="py-3 px-5">Impact</th><th class="py-3 px-5 text-right">Actions</th></tr><tbody id="schoolTeachersList" class="text-sm"></tbody></table><div id="schoolTeachersEmpty" class="hidden"><div class="empty-state"><div class="empty-state-icon"><span>👩‍🏫</span></div><p class="text-slate-400 font-semibold text-sm">No teachers yet</p><button onclick="staffAddTeacher()" class="empty-state-cta">+ Add First Teacher</button></div></div></div>
+        <button onclick="location.reload()" class="w-full mt-6 bg-white/4 hover:bg-white/8 py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition">Close Staff Portal</button>
+    </div>
+
+    <div id="networkDashboard" class="portal-container dashboard-bg p-6 md:p-8 rounded-[2rem] border border-red-500/20 text-white w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto" style="background:var(--bg-card)">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4"><div><p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Administrator</p><h2 class="text-2xl font-black uppercase text-red-400">Network Database</h2></div><div class="flex gap-2"><button onclick="networkAddSchool()" class="bg-red-500 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase hover:bg-red-400 transition">+ School</button><button onclick="resetNetwork()" class="bg-white/6 text-white px-5 py-2.5 rounded-lg font-bold text-xs uppercase hover:bg-white/12 transition">Reset</button></div></div>
+        <div class="bg-black/20 rounded-2xl border border-white/5 overflow-hidden"><table class="w-full text-left"><tr class="text-slate-500 uppercase font-bold border-b border-white/6 text-[10px] tracking-wider bg-black/30"><th class="py-3 px-5">School</th><th class="py-3 px-5">Staff Code</th><th class="py-3 px-5">Teachers</th><th class="py-3 px-5">Impact</th><th class="py-3 px-5 text-right">Actions</th></tr><tbody id="networkSchoolsList" class="text-sm"></tbody></table><div id="networkEmpty" class="hidden"><div class="empty-state"><div class="empty-state-icon"><span>🏫</span></div><p class="text-slate-400 font-semibold text-sm">No schools in the network</p><button onclick="networkAddSchool()" class="empty-state-cta">+ Add First School</button></div></div></div>
+        <button onclick="location.reload()" class="w-full mt-8 bg-white/4 hover:bg-white/8 py-4 rounded-xl font-bold text-sm uppercase tracking-wider transition">Close Network Console</button>
+    </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PART 1 JAVASCRIPT STARTS HERE                                -->
+<!-- ============================================================ -->
+<script>
+let audioCtx=null;
+function getAudioCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function haptic(s='light'){if(!navigator.vibrate)return;const p={light:[10],medium:[20],heavy:[40],success:[15,60,15],reward:[30,50,30,50,60],error:[80,30,80],tap:[8]};navigator.vibrate(p[s]||[10]);}
+function playTone(f,t='sine',d=0.12,v=0.15,dl=0){try{const c=getAudioCtx(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.setValueAtTime(f,c.currentTime+dl);g.gain.setValueAtTime(0,c.currentTime+dl);g.gain.linearRampToValueAtTime(v,c.currentTime+dl+0.01);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+dl+d);o.start(c.currentTime+dl);o.stop(c.currentTime+dl+d+0.05);}catch(e){}}
+const SFX={tap(){playTone(880,'sine',0.06,0.08);haptic('tap');},click(){playTone(520,'sine',0.08,0.12);playTone(660,'sine',0.07,0.08,0.06);haptic('light');},open(){playTone(440,'sine',0.1,0.10);playTone(550,'sine',0.1,0.10,0.08);playTone(660,'sine',0.12,0.12,0.16);haptic('medium');},close(){playTone(440,'sine',0.1,0.08);playTone(330,'sine',0.12,0.08,0.09);haptic('light');},submit(){playTone(523,'triangle',0.08,0.12);playTone(659,'triangle',0.08,0.12,0.07);haptic('medium');},reward(){[523,659,784,1047].forEach((f,i)=>playTone(f,'sine',0.18,0.15,i*0.08));haptic('reward');},error(){playTone(220,'sawtooth',0.15,0.10);playTone(180,'sawtooth',0.15,0.08,0.12);haptic('error');},plus(){playTone(660,'sine',0.08,0.10);haptic('light');},minus(){playTone(330,'sine',0.08,0.09);haptic('light');},tabSwitch(){playTone(700,'sine',0.06,0.07);haptic('tap');},badge(){[660,880,1100].forEach((f,i)=>playTone(f,'sine',0.12,0.12,i*0.06));haptic('success');}};
+
+const CIRCUM=502.6;
+let currentUser=null,currentTeacher=null,currentSchool=null,activePeriodId=null;
+let confirmCallback=null,analyticsChartInstance=null,currentThemeIndex=0;
+const THEMES=['theme-forest','theme-ocean','theme-sunset','theme-night','theme-beachside','theme-rainbow'];
+const THEME_NAMES=['🌿 Forest','🌊 Ocean','🌅 Sunset','🌙 Night','🏖️ Beachside','🌈 Rainbow'];
+const THEME_UNLOCK_REQ=[0,5,10,15,20,25];
+let schoolLBSort='lifetime',classLBSort='lifetime',schoolLBFilter='',classLBFilter='';
+let onboardRole='student',styledModalCallback=null,styledModalFields=[];
+const PERIOD_EMOJIS=['🌿','📚','🔬','🎨','🎵','🏀','📐','🧪','📖','🌍','💻','🎭','🔢','✏️','🧠','⚡','🦋','🌸','🎯','🏆','🌈','🔥','💎','🎪'];
+const RECYCLABLE_EMOJIS=['♻️','🍶','🥫','📄','📦','🫙','🛍️','💻','🍎','👕','🔋','🧴','🥤','🪵','🧻','🪣','☕','🥡','🧊','💡','🪫','🧽','🎒','📰'];
+let recyclableEmojiEditIndex=null;
+let themePickerMode=null; // 'student' or 'teacher'
+
+const CLASS_BADGES=[
+    {id:'c10',threshold:10,emoji:'🌱',label:'First Sprout',msg:'Your class recycled 10 items!'},
+    {id:'c25',threshold:25,emoji:'🌿',label:'Green Crew',msg:'25 items recycled!'},
+    {id:'c50',threshold:50,emoji:'♻️',label:'Recycling Rookies',msg:'50 items! Great start!'},
+    {id:'c75',threshold:75,emoji:'🌾',label:'Harvest Helpers',msg:'75 items saved!'},
+    {id:'c100',threshold:100,emoji:'🌳',label:'Tree Savers',msg:'100 items! Amazing!'},
+    {id:'c150',threshold:150,emoji:'🐝',label:'Pollinator Pals',msg:'150 items! Buzzing!'},
+    {id:'c200',threshold:200,emoji:'💧',label:'Water Guardians',msg:'200 items! Protecting water!'},
+    {id:'c250',threshold:250,emoji:'🌻',label:'Bloom Brigade',msg:'250 items saved!'},
+    {id:'c300',threshold:300,emoji:'🐢',label:'Ocean Defenders',msg:'300 items! Saving sea life!'},
+    {id:'c350',threshold:350,emoji:'🍃',label:'Leaf Legends',msg:'350 items! Legendary!'},
+    {id:'c400',threshold:400,emoji:'🦋',label:'Eco Warriors',msg:'400 items! Warriors!'},
+    {id:'c450',threshold:450,emoji:'🌊',label:'Tide Turners',msg:'450 items! Turning the tide!'},
+    {id:'c500',threshold:500,emoji:'🦅',label:'Sky Keepers',msg:'500 items! Soaring!'},
+    {id:'c600',threshold:600,emoji:'🏔️',label:'Mountain Movers',msg:'600 items! Moving mountains!'},
+    {id:'c700',threshold:700,emoji:'🌍',label:'Planet Protectors',msg:'700 items! Global impact!'},
+    {id:'c800',threshold:800,emoji:'🐋',label:'Whale Watchers',msg:'800 items! Ocean-sized!'},
+    {id:'c900',threshold:900,emoji:'🌴',label:'Palm Pioneers',msg:'900 items! Pioneering!'},
+    {id:'c1000',threshold:1000,emoji:'🦁',label:'Wild Protectors',msg:'1000 items! Fierce!'},
+    {id:'c1200',threshold:1200,emoji:'🌺',label:'Flora Champions',msg:'1200 items! Championing nature!'},
+    {id:'c1400',threshold:1400,emoji:'🦜',label:'Rainforest Rangers',msg:'1400 items! Ranger status!'},
+    {id:'c1600',threshold:1600,emoji:'🏝️',label:'Island Guardians',msg:'1600 items! Guarding paradise!'},
+    {id:'c1800',threshold:1800,emoji:'🌵',label:'Desert Bloomers',msg:'1800 items!'},
+    {id:'c2000',threshold:2000,emoji:'❄️',label:'Arctic Allies',msg:'2000 items! Cool as ice!'},
+    {id:'c2500',threshold:2500,emoji:'🦈',label:'Deep Sea Defenders',msg:'2500 items!'},
+    {id:'c3000',threshold:3000,emoji:'🌋',label:'Volcanic Visionaries',msg:'3000 items!'},
+    {id:'c3500',threshold:3500,emoji:'🦩',label:'Flamingo Force',msg:'3500 items!'},
+    {id:'c4000',threshold:4000,emoji:'🌏',label:'Global Champions',msg:'4000 items! World-class!'},
+    {id:'c5000',threshold:5000,emoji:'🦕',label:'Prehistoric Pledge',msg:'5000 items!'},
+    {id:'c7500',threshold:7500,emoji:'⭐',label:'Stellar Stewards',msg:'7500 items! Among the stars!'},
+    {id:'c10000',threshold:10000,emoji:'🏆',label:'Eco Legends',msg:'10000 items! LEGENDARY!'},
+];
+
+let db=JSON.parse(localStorage.getItem('ecolink_v5'));
+if(!db){db={schools:{},teachers:{},periods:{},networkFeed:[]};save();}
+if(!db.networkFeed)db.networkFeed=[];
+const savedTheme=localStorage.getItem('ecolink_theme');
+if(savedTheme&&THEMES.includes(savedTheme)){currentThemeIndex=THEMES.indexOf(savedTheme);document.body.classList.remove(...THEMES);document.body.classList.add(savedTheme);}
+
+function initDbFields(){
+    Object.values(db.schools).forEach(s=>{if(s.pointsPerPrize===undefined)s.pointsPerPrize=100;if(s.prizeValue===undefined)s.prizeValue=25;if(s.prizeName===undefined)s.prizeName='Eco Cash';if(s.itemsPerFive===undefined)s.itemsPerFive=1;if(s.recyclables===undefined)s.recyclables=getDefaultRecyclables();});
+    Object.values(db.periods).forEach(p=>{if(p.students===undefined)p.students=30;if(p.score===undefined)p.score=0;if(p.colts===undefined)p.colts=0;if(p.totalLifetime===undefined)p.totalLifetime=0;if(p.goal===undefined)p.goal=null;if(p.earnedBadges===undefined)p.earnedBadges=[];if(p.activityLog===undefined)p.activityLog=[];if(p.streak===undefined)p.streak={count:0,lastDate:null};if(p.weeklyData===undefined)p.weeklyData=[0,0,0,0,0,0,0];if(p.emblem===undefined)p.emblem={emoji:'🌿',color:'lime'};if(p.theme===undefined)p.theme='theme-forest';});
+}
+initDbFields();
+function save(){localStorage.setItem('ecolink_v5',JSON.stringify(db));updatePublicLeaderboards();}
+function genCode(){return Math.floor(100000+Math.random()*900000).toString();}
+
+function getUnlockedThemeCount(period){return Math.min(Math.floor((period.earnedBadges||[]).length/5)+1,THEMES.length);}
+function getUnlockedThemes(period){return THEMES.slice(0,getUnlockedThemeCount(period));}
+function applyTheme(t){document.body.classList.remove(...THEMES);document.body.classList.add(t);currentThemeIndex=THEMES.indexOf(t);localStorage.setItem('ecolink_theme',t);}
+
+function openThemePicker(mode){
+    themePickerMode=mode;
+    let period=null;
+    if(mode==='student'&&currentUser) period=currentUser;
+    else if(mode==='teacher'&&activePeriodId) period=db.periods[activePeriodId];
+    if(!period)return;
+    const unlocked=getUnlockedThemes(period);
+    const bc=(period.earnedBadges||[]).length;
+    const ct=period.theme||'theme-forest';
+    document.getElementById('themePickerTitle').innerText=mode==='teacher'?'Set Class Theme':'Choose Theme';
+    document.getElementById('themePickerSubtitle').innerText=mode==='teacher'?'All students in this period will see this theme.':'Pick from themes your class has unlocked!';
+    const nextU=getUnlockedThemeCount(period)<THEMES.length?(Math.floor(bc/5)+1)*5:null;
+    document.getElementById('themePickerHint').innerText=nextU?`🏅 ${nextU-bc} more badge${nextU-bc!==1?'s':''} to unlock the next theme! Earn badges as a team!`:'🎉 All themes unlocked! Your class is amazing!';
+    document.getElementById('themePickerGrid').innerHTML=THEMES.map((t,i)=>{
+        const ok=unlocked.includes(t),act=ct===t;
+        return `<button onclick="selectThemeFromPicker('${t}')" class="theme-picker-btn ${act?'active-theme':''}" ${!ok?'disabled':''}><span class="text-xl">${THEME_NAMES[i].split(' ')[0]}</span><span class="flex-1">${THEME_NAMES[i].split(' ').slice(1).join(' ')}</span>${act?'<span class="text-[10px] font-bold accent-text uppercase">Active</span>':''}${!ok?`<span class="text-[10px] font-bold text-slate-500">🔒 ${THEME_UNLOCK_REQ[i]} badges</span>`:''}</button>`;
+    }).join('');
+    document.getElementById('themePickerOverlay').classList.add('active');SFX.open();
+}
+function closeThemePicker(){document.getElementById('themePickerOverlay').classList.remove('active');}
+function selectThemeFromPicker(t){
+    if(themePickerMode==='student'&&currentUser){currentUser.theme=t;applyTheme(t);save();updateClassUI();}
+    else if(themePickerMode==='teacher'&&activePeriodId){const p=db.periods[activePeriodId];p.theme=t;applyTheme(t);save();renderTeacherTabs();}
+    closeThemePicker();
+    showToast(`Theme: ${THEME_NAMES[THEMES.indexOf(t)]}${themePickerMode==='teacher'?' — applied to all students!':''}`, 'success','🎨',2500);SFX.tap();
+}
+function renderStudentThemeMini(period){
+    const grid=document.getElementById('studentThemeMiniGrid');if(!grid)return;
+    const unlocked=getUnlockedThemes(period);const ct=period.theme||'theme-forest';
+    const bc=(period.earnedBadges||[]).length;
+    grid.innerHTML=THEMES.map((t,i)=>{
+        const ok=unlocked.includes(t),act=ct===t;
+        const needed=THEME_UNLOCK_REQ[i]-bc;
+        let label='';
+        if(ok&&act) label=THEME_NAMES[i].split(' ').slice(1).join(' ')+' ✓';
+        else if(ok) label=THEME_NAMES[i].split(' ').slice(1).join(' ');
+        else label='🔒 '+needed+' more badge'+(needed!==1?'s':'');
+        return `<span class="theme-mini-btn ${act?'active-t':''} ${!ok?'locked':''}" style="cursor:default;" title="${ok?(act?'Current theme set by your teacher':'Unlocked — ask your teacher to select this theme!'):'Earn '+needed+' more badge'+(needed!==1?'s':'')+' as a class to unlock'}">${THEME_NAMES[i].split(' ')[0]} ${label}</span>`;
+    }).join('');
+}
+
+function showOnboarding(){hidePortal();document.getElementById('onboardingOverlay').classList.add('active');document.getElementById('onboardStep1').classList.add('active');document.getElementById('onboardStep2').classList.remove('active');document.getElementById('onboardStep3').classList.remove('active');SFX.open();}
+function onboardSelectRole(role){onboardRole=role;SFX.click();document.getElementById('onboardStep1').classList.remove('active');document.getElementById('onboardStep2').classList.add('active');if(role==='staff'){document.getElementById('onboardStep3Desc').innerText='Your school admin will provide your staff or teacher code.';document.getElementById('onboardCodeInput').placeholder='ACCESS CODE';document.getElementById('onboardCodeInput').maxLength=20;}else{document.getElementById('onboardStep3Desc').innerText='Your teacher will provide a 6-digit class code.';document.getElementById('onboardCodeInput').placeholder='000000';document.getElementById('onboardCodeInput').maxLength=6;}}
+function onboardNext(step){SFX.click();document.querySelectorAll('.onboarding-step').forEach(s=>s.classList.remove('active'));document.getElementById('onboardStep'+step).classList.add('active');}
+function onboardFinish(){const code=document.getElementById('onboardCodeInput').value.trim();if(!code){SFX.error();showToast('Please enter a code','error','❌');return;}document.getElementById('onboardingOverlay').classList.remove('active');localStorage.setItem('ecolink_onboarded','true');if(onboardRole==='student'){if(db.periods[code]){document.getElementById('portalOverlay').classList.add('active');currentUser=db.periods[code];const t=db.teachers[currentUser.teacherId];document.getElementById('classNameDisplay').innerText=`${t.name} — ${currentUser.name}`;applyTheme(currentUser.theme||'theme-forest');updateClassUI();showPortal('studentDashboard');showDailyFact();SFX.open();}else{openLoginModal('student');document.getElementById('loginClassCode').value=code;showToast('Code not found — try again','error','❌');}}else{openLoginModal('school');}}
+function skipOnboarding(){document.getElementById('onboardingOverlay').classList.remove('active');localStorage.setItem('ecolink_onboarded','true');openLoginModal();}
+function checkFirstVisit(){if(!localStorage.getItem('ecolink_onboarded')){setTimeout(()=>showOnboarding(),800);}}
+
+function openStyledModal({title,subtitle,emoji,fields,submitLabel,submitClass,onSubmit}){document.getElementById('modalTitle').innerText=title||'Form';document.getElementById('modalSubtitle').innerText=subtitle||'';document.getElementById('modalEmoji').innerText=emoji||'📝';const btn=document.getElementById('modalSubmitBtn');btn.innerText=submitLabel||'Confirm';btn.className=submitClass||'modal-btn-primary';styledModalFields=fields||[];styledModalCallback=onSubmit;const c=document.getElementById('modalFieldsContainer');c.innerHTML=fields.map((f,i)=>`<div class="modal-row"><label class="modal-label">${f.label}</label>${f.type==='select'?`<select id="modalField${i}" class="modal-input">${f.options.map(o=>`<option value="${o.value}" ${o.value==f.default?'selected':''}>${o.label}</option>`).join('')}</select>`:`<input type="${f.type||'text'}" id="modalField${i}" class="modal-input" placeholder="${f.placeholder||''}" value="${f.default||''}" ${f.min!==undefined?`min="${f.min}"`:''} ${f.max!==undefined?`max="${f.max}"`:''} >`}${f.hint?`<p class="text-[10px] text-slate-600 mt-1">${f.hint}</p>`:''}</div>`).join('');document.getElementById('styledModalOverlay').classList.add('active');setTimeout(()=>{const first=document.getElementById('modalField0');if(first)first.focus();},100);}
+function closeStyledModal(){document.getElementById('styledModalOverlay').classList.remove('active');styledModalCallback=null;}
+function submitStyledModal(){const v=styledModalFields.map((f,i)=>{const el=document.getElementById('modalField'+i);return f.type==='number'?parseFloat(el.value):el.value;});if(styledModalCallback)styledModalCallback(v);closeStyledModal();}
+function showImpactSummary({emoji,title,subtitle,items}){document.getElementById('impactSummaryEmoji').innerText=emoji||'✅';document.getElementById('impactSummaryTitle').innerText=title||'Done!';document.getElementById('impactSummarySubtitle').innerText=subtitle||'';document.getElementById('impactSummaryContent').innerHTML=items.map(i=>`<div class="flex items-center justify-between bg-white/5 rounded-xl p-3"><div class="flex items-center gap-2"><span class="text-lg">${i.icon}</span><span class="text-sm font-medium text-slate-300">${i.label}</span></div><span class="text-sm font-black ${i.color||'text-white'}">${i.value}</span></div>`).join('');document.getElementById('impactSummaryOverlay').classList.add('active');}
+function closeImpactSummary(){document.getElementById('impactSummaryOverlay').classList.remove('active');}
+function confettiThenClose(){const btn=document.getElementById('impactCheckBtn');if(btn){const rect=btn.getBoundingClientRect();const x=rect.left+rect.width/2;const y=rect.top+rect.height/2;confetti({particleCount:120,spread:70,origin:{x:x/window.innerWidth,y:y/window.innerHeight},zIndex:9999});}setTimeout(()=>closeImpactSummary(),400);}
+
+window.addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('scrollProgress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100+'%';});
+function showToast(msg,type='success',emoji='✅',dur=3500){const c=document.getElementById('toastContainer'),t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span style="font-size:1.1rem">${emoji}</span><span>${msg}</span>`;c.appendChild(t);setTimeout(()=>{t.style.animation='toastOut 0.3s ease forwards';setTimeout(()=>t.remove(),350);},dur);}
+function showConfirm(title,msg,emoji,btnLabel,cb,summaryHTML){document.getElementById('confirmTitle').innerText=title;document.getElementById('confirmMsg').innerText=msg;document.getElementById('confirmEmoji').innerText=emoji;document.getElementById('confirmBtn').innerText=btnLabel;const d=document.getElementById('confirmSummaryDetails');if(summaryHTML){d.innerHTML=summaryHTML;d.classList.remove('hidden');}else{d.classList.add('hidden');}confirmCallback=cb;document.getElementById('confirmOverlay').classList.add('active');}
+function confirmAction(yes){document.getElementById('confirmOverlay').classList.remove('active');if(yes&&confirmCallback)confirmCallback();confirmCallback=null;}
+function togglePw(id,btn){const inp=document.getElementById(id);const h=inp.type==='password';inp.type=h?'text':'password';btn.innerHTML=h?`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`:`<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;}
+
+function openLoginModal(defaultTab='student'){SFX.open();document.getElementById('portalOverlay').classList.add('active');document.querySelectorAll('.portal-container').forEach(c=>c.classList.remove('portal-active'));document.getElementById('loginModal').classList.add('portal-active');switchLoginTab(defaultTab);}
+function switchLoginTab(tab){SFX.tabSwitch();document.querySelectorAll('.login-pane').forEach(p=>p.classList.add('hidden'));document.getElementById(`login-${tab}`).classList.remove('hidden');['student','teacher','school','admin'].forEach(t=>{document.getElementById(`tab-${t}`).className="flex-1 py-2.5 rounded-lg font-bold text-xs uppercase transition text-slate-400 hover:text-white";});const c={student:'accent-bg text-black',teacher:'bg-white text-black',school:'bg-amber-400 text-black',admin:'bg-red-500 text-white'};document.getElementById(`tab-${tab}`).className=`flex-1 py-2.5 rounded-lg font-bold text-xs uppercase transition ${c[tab]}`;}
+function showPortal(id){document.querySelectorAll('.portal-container').forEach(c=>c.classList.remove('portal-active'));document.getElementById(id).classList.add('portal-active');}
+function hidePortal(){SFX.close();document.getElementById('portalOverlay').classList.remove('active');}
+document.getElementById('portalOverlay')?.addEventListener('click',function(e){if(e.target===this)hidePortal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){hidePortal();['confirmOverlay','recyclablesOverlay','recyclablesEditorOverlay','styledModalOverlay','impactSummaryOverlay','glossaryOverlay','onboardingOverlay','advancedSettingsOverlay','themePickerOverlay'].forEach(id=>document.getElementById(id)?.classList.remove('active'));}});
+
+function authClass(){const code=document.getElementById('loginClassCode').value.trim();if(!db.periods[code]){SFX.error();showToast('Invalid class code','error','❌');return;}SFX.open();currentUser=db.periods[code];const t=db.teachers[currentUser.teacherId];document.getElementById('classNameDisplay').innerText=`${t.name} — ${currentUser.name}`;applyTheme(currentUser.theme||'theme-forest');updateClassUI();showPortal('studentDashboard');showDailyFact();}
+function authTeacher(){const code=document.getElementById('loginTeacherCode').value.trim().toUpperCase();let t=Object.values(db.teachers).find(x=>x.code===code);if(!t){SFX.error();showToast('Invalid teacher code','error','❌');return;}SFX.open();currentTeacher=t;document.getElementById('teacherNameDisplay').innerText=t.name;document.getElementById('teacherSchoolDisplay').innerText=db.schools[t.schoolId].name;let tP=Object.values(db.periods).filter(p=>p.teacherId===currentTeacher.id);tP.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));activePeriodId=tP.length>0?tP[0].id:null;if(activePeriodId)applyTheme(db.periods[activePeriodId].theme||'theme-forest');renderTeacherTabs();showPortal('teacherDashboard');}
+function authSchool(){const code=document.getElementById('loginSchoolCode').value.trim().toUpperCase();let s=Object.values(db.schools).find(x=>x.code===code);if(!s){SFX.error();showToast('Invalid school code','error','❌');return;}SFX.open();currentSchool=s;document.getElementById('staffSchoolName').innerText=s.name;renderStaffDashboard();showPortal('schoolDashboard');}
+function authAdmin(){if(document.getElementById('loginAdminPass').value==='RHIS2026'){SFX.open();renderNetworkDashboard();showPortal('networkDashboard');}else{SFX.error();showToast('Access denied','error','🔒');}}
+
+function updateStreak(p){const today=new Date().toISOString().split('T')[0];if(!p.streak)p.streak={count:0,lastDate:null};if(p.streak.lastDate===today)return;const yest=new Date(Date.now()-86400000).toISOString().split('T')[0];if(p.streak.lastDate===yest)p.streak.count++;else p.streak.count=1;p.streak.lastDate=today;if(p.streak.count>=5&&p.streak.count%5===0)showToast(`${p.streak.count}-day streak! 🔥`,'milestone','🔥',4000);}
+function logActivity(p,msg){if(!p.activityLog)p.activityLog=[];p.activityLog.unshift({msg,time:Date.now()});if(p.activityLog.length>20)p.activityLog=p.activityLog.slice(0,20);}
+function renderActivityLog(p){const l=document.getElementById('activityList');if(!l)return;const log=p.activityLog||[];if(!log.length){l.innerHTML='<p class="text-xs text-slate-600 font-medium text-center py-3">No activity yet — submit your first item!</p>';return;}l.innerHTML=log.slice(0,5).map(a=>`<div class="activity-item"><div class="activity-dot" style="background:var(--accent)"></div><span class="text-slate-300 flex-1">${a.msg}</span><span class="text-slate-600 text-[10px] font-medium">${timeAgo(a.time)}</span></div>`).join('');}
+function timeAgo(ts){const d=Date.now()-ts,m=Math.floor(d/60000);if(m<1)return 'now';if(m<60)return `${m}m`;const h=Math.floor(m/60);if(h<24)return `${h}h`;return `${Math.floor(h/24)}d`;}
+function addNetworkFeedItem(msg,emoji){if(!db.networkFeed)db.networkFeed=[];db.networkFeed.unshift({msg,emoji,time:Date.now()});if(db.networkFeed.length>30)db.networkFeed=db.networkFeed.slice(0,30);}
+function renderNetworkFeed(){const f=document.getElementById('networkActivityFeed');if(!f)return;const items=db.networkFeed||[];if(!items.length){f.innerHTML=`<div class="text-center py-8"><p class="text-slate-400 text-sm font-semibold">No activity yet</p></div>`;return;}f.innerHTML=items.slice(0,12).map(i=>`<div class="feed-item"><div class="feed-dot bg-lime-500"></div><span class="text-slate-600 flex-1 font-medium">${i.emoji} ${i.msg}</span><span class="text-slate-400 text-[10px] font-medium">${timeAgo(i.time)}</span></div>`).join('');}
+
+function checkClassBadges(period){const total=Math.floor(period.totalLifetime);const earned=period.earnedBadges||[];let newBadge=null;const prevCount=earned.length;CLASS_BADGES.forEach(b=>{if(total>=b.threshold&&!earned.includes(b.id)){earned.push(b.id);newBadge=b;}});period.earnedBadges=earned;if(newBadge){SFX.badge();confetti({particleCount:200,spread:80,origin:{y:0.5}});showToast(`${newBadge.label}: ${newBadge.msg}`,'milestone',newBadge.emoji,6000);const t=db.teachers[period.teacherId];addNetworkFeedItem(`${t?.name||''}'s ${period.name} earned "${newBadge.label}"!`,newBadge.emoji);const newCount=getUnlockedThemeCount(period),oldCount=Math.min(Math.floor(prevCount/5)+1,THEMES.length);if(newCount>oldCount)setTimeout(()=>showToast(`New theme unlocked: ${THEME_NAMES[newCount-1]}! 🎨`,'milestone','🎨',5000),2000);}}
+function renderBadges(period){const l=document.getElementById('badgesList');if(!l)return;const earned=period.earnedBadges||[];const total=Math.floor(period.totalLifetime);if(!earned.length){const next=CLASS_BADGES[0];l.innerHTML=`<span class="text-xs text-slate-600 font-medium">Recycle ${next.threshold-total} more items to earn ${next.emoji} <strong>${next.label}</strong></span>`;return;}l.innerHTML='';CLASS_BADGES.forEach((b,i)=>{const e=earned.includes(b.id),el=document.createElement('span');if(e){el.className='badge-item inline-flex items-center gap-1 bg-white/8 border border-white/12 px-2.5 py-1 rounded-lg text-[11px] font-bold text-white';el.style.animationDelay=`${i*0.04}s`;el.innerHTML=`${b.emoji} ${b.label}`;}else{el.className='inline-flex items-center gap-1 bg-white/3 border border-white/5 px-2.5 py-1 rounded-lg text-[11px] font-bold text-slate-700';el.innerHTML=`🔒 ${b.label}`;}l.appendChild(el);});}
+function updateNextMilestone(p){const total=Math.floor(p.totalLifetime);const sId=db.teachers[p.teacherId].schoolId;const s=db.schools[sId];const th=s.pointsPerPrize||100;const ptsTo=th-Math.floor(p.score);const nb=CLASS_BADGES.find(b=>total<b.threshold);if(nb){document.getElementById('nextMilestoneLabel').innerText=`${nb.emoji} ${nb.label}`;document.getElementById('nextMilestoneItems').innerText=`${nb.threshold-total} items to go`;}else{document.getElementById('nextMilestoneLabel').innerText='🏆 All badges earned!';document.getElementById('nextMilestoneItems').innerText='Legend status';}document.getElementById('nextMilestoneReward').innerText=`${Math.ceil(ptsTo/5*(s.itemsPerFive||1))} items to next ${s.prizeName}`;}
+function updateWeeklyData(p,n){if(!p.weeklyData)p.weeklyData=[0,0,0,0,0,0,0];const d=new Date().getDay();p.weeklyData[d===0?6:d-1]+=n;}
+function renderSparkline(p){const c=document.getElementById('studentSparkline');if(!c)return;const d=p.weeklyData||[0,0,0,0,0,0,0];const mx=Math.max(...d,1);const t=d.reduce((a,b)=>a+b,0);document.getElementById('sparklineTotal').innerText=`${t} items this week`;c.innerHTML=d.map(v=>`<div class="sparkline-bar" style="height:${Math.max((v/mx)*36,2)}px;opacity:${v>0?1:0.3}"></div>`).join('');}
+
+const ECO_FACTS=["Recycling one aluminum can saves enough energy to run a TV for 3 hours! 📺","Americans throw away 25 billion Styrofoam cups every year. 😱","Glass can be recycled infinitely without losing quality. ♾️","It takes 450 years for a plastic bottle to decompose. ⏳","Recycling paper uses 60% less energy than making it from scratch. ⚡","One ton of recycled cardboard saves 9 cubic yards of landfill space. 📦","The U.S. recycles about 34% of its waste — we can do better! 💪","Recycling 1 ton of plastic saves 1,000–2,000 gallons of gasoline. ⛽","About 80% of what Americans throw away is recyclable. 🗑️","A glass bottle takes over 4,000 years to decompose. 🏺","Recycling a glass bottle saves enough energy to light a bulb for 4 hours. 💡","The average American generates about 4.4 pounds of trash per day. 📊","By 2050, there could be more plastic in the oceans than fish. 🐟","Aluminum is 100% recyclable and can be recycled indefinitely! 🥫","Composting food waste reduces methane emissions in landfills. 🌱"];
+function showDailyFact(){const el=document.getElementById('ecoFactText');if(el)el.innerText=ECO_FACTS[Math.floor(Date.now()/86400000)%ECO_FACTS.length];}
+
+function getDefaultRecyclables(){return [{id:'r1',name:'Plastic Bottles',emoji:'🍶',enabled:true},{id:'r2',name:'Aluminum Cans',emoji:'🥫',enabled:true},{id:'r3',name:'Paper',emoji:'📄',enabled:true},{id:'r4',name:'Cardboard',emoji:'📦',enabled:true},{id:'r5',name:'Glass Bottles',emoji:'🫙',enabled:true},{id:'r6',name:'Plastic Bags',emoji:'🛍️',enabled:false},{id:'r7',name:'Electronics',emoji:'💻',enabled:false},{id:'r8',name:'Food Waste/Compost',emoji:'🍎',enabled:false},{id:'r9',name:'Textiles/Clothing',emoji:'👕',enabled:false},{id:'r10',name:'Batteries',emoji:'🔋',enabled:false}];}
+function getSchoolForCurrentUser(){if(currentUser){const t=db.teachers[currentUser.teacherId];return t?db.schools[t.schoolId]:null;}if(currentTeacher)return db.schools[currentTeacher.schoolId];return null;}
+function openRecyclables(){const s=getSchoolForCurrentUser();if(!s)return;document.getElementById('recyclablesSchoolName').innerText=s.name+' — Recycling Guidelines';document.getElementById('recyclablesGrid').innerHTML=(s.recyclables||getDefaultRecyclables()).map(r=>`<span class="recyclable-chip ${r.enabled?'':'disabled'}">${r.emoji} ${r.name}</span>`).join('');document.getElementById('recyclablesOverlay').classList.add('active');}
+function closeRecyclables(){document.getElementById('recyclablesOverlay').classList.remove('active');}
+
+// BUG FIX: ALL items (default + custom) can be deleted and have emoji editing
+function openRecyclablesEditor(){const items=currentSchool.recyclables||getDefaultRecyclables();currentSchool.recyclables=items;recyclableEmojiEditIndex=null;document.getElementById('recyclableEmojiPicker').classList.add('hidden');renderRecyclablesEditor();document.getElementById('recyclablesEditorOverlay').classList.add('active');}
+function renderRecyclablesEditor(){document.getElementById('recyclablesEditorGrid').innerHTML=currentSchool.recyclables.map((r,i)=>`<div class="flex items-center gap-1"><button onclick="toggleRecyclable(${i})" class="recyclable-chip ${r.enabled?'':'disabled'} cursor-pointer hover:opacity-80 transition">${r.emoji} ${r.name}</button><button onclick="openRecyclableEmojiPicker(${i})" class="recyclable-edit-btn" title="Change emoji">🎨</button><button onclick="deleteRecyclableItem(${i})" class="recyclable-edit-btn danger" title="Delete">🗑️</button></div>`).join('');}
+function toggleRecyclable(i){currentSchool.recyclables[i].enabled=!currentSchool.recyclables[i].enabled;renderRecyclablesEditor();save();}
+function deleteRecyclableItem(i){const item=currentSchool.recyclables[i];if(!item)return;showConfirm(`Remove "${item.name}"?`,'This item will be permanently deleted from the list.','🗑️','Delete',()=>{currentSchool.recyclables.splice(i,1);if(recyclableEmojiEditIndex===i){recyclableEmojiEditIndex=null;document.getElementById('recyclableEmojiPicker').classList.add('hidden');}save();renderRecyclablesEditor();showToast(`"${item.name}" removed`,'success','🗑️',2000);});}
+function openRecyclableEmojiPicker(i){const item=currentSchool.recyclables[i];if(!item)return;recyclableEmojiEditIndex=i;const pk=document.getElementById('recyclableEmojiPicker');document.getElementById('recyclableEmojiTarget').innerText=`${item.emoji} ${item.name}`;pk.querySelector('.emoji-grid').innerHTML=RECYCLABLE_EMOJIS.map(e=>`<button onclick="setRecyclableEmoji('${e}')">${e}</button>`).join('');pk.classList.remove('hidden');}
+function setRecyclableEmoji(emoji){if(recyclableEmojiEditIndex===null)return;currentSchool.recyclables[recyclableEmojiEditIndex].emoji=emoji;save();renderRecyclablesEditor();document.getElementById('recyclableEmojiPicker').classList.add('hidden');recyclableEmojiEditIndex=null;showToast(`Emoji updated to ${emoji}`,'success',emoji,2000);SFX.tap();}
+function addCustomRecyclable(){const inp=document.getElementById('newRecyclableInput');const v=inp.value.trim();if(!v)return;if(currentSchool.recyclables.some(r=>r.name.toLowerCase()===v.toLowerCase())){showToast(`"${v}" already exists`,'error','❌');return;}currentSchool.recyclables.push({id:'custom_'+Date.now(),name:v,emoji:'♻️',enabled:true});inp.value='';renderRecyclablesEditor();save();showToast(`Added: ${v}`,'success','♻️',2000);}
+function closeRecyclablesEditor(){document.getElementById('recyclablesEditorOverlay').classList.remove('active');recyclableEmojiEditIndex=null;save();showToast('Recyclables updated!','success','♻️',2000);}
+
+function updateClassUI(){
+    const sId=db.teachers[currentUser.teacherId].schoolId,s=db.schools[sId],th=s.pointsPerPrize||100,pName=s.prizeName||'Eco Cash';
+    const emb=currentUser.emblem||{emoji:'🌿'};document.getElementById('classEmblem').innerHTML=emb.emoji;
+    document.getElementById('classInfoDisplay').innerText=`${s.name} · ${currentUser.students} Students`;document.getElementById('scoreDisplay').innerText=Math.floor(currentUser.score);document.getElementById('userColts').innerText=`${currentUser.colts} ${pName}`;
+    document.getElementById('perStudentSplit').innerText=`Est. ${currentUser.students>0?(currentUser.colts/currentUser.students).toFixed(2):'0.00'} ${pName}/stu`;
+    document.getElementById('streakDisplay').innerText=`🔥 ${(currentUser.streak||{count:0}).count}`;
+    document.getElementById('progressBar').style.strokeDashoffset=CIRCUM-(currentUser.score/th)*CIRCUM;
+    if(currentUser.goal){const g=currentUser.goal,pct=Math.min((currentUser.totalLifetime/g.target)*100,100);document.getElementById('goalSection').classList.remove('hidden');document.getElementById('goalLabel').innerText=`🎯 Goal: ${g.target} Items`;document.getElementById('goalProgress').innerText=`${Math.floor(currentUser.totalLifetime)} / ${g.target}`;document.getElementById('goalBarFill').style.width=`${pct}%`;document.getElementById('goalReward').innerText=g.reward?`🏆 Reward: ${g.reward}`:'';if(currentUser.totalLifetime>=g.target&&!currentUser.goalCompleted){currentUser.goalCompleted=true;SFX.reward();confetti({particleCount:350,spread:120,origin:{y:0.4}});showToast(`Class Goal Reached! ${g.reward||'Amazing!'}`,'milestone','🏆',7000);}}else{document.getElementById('goalSection').classList.add('hidden');}
+    updateNextMilestone(currentUser);renderBadges(currentUser);renderActivityLog(currentUser);renderSparkline(currentUser);renderStudentThemeMini(currentUser);save();
+}
+
+function requestSubmit(n){const sId=db.teachers[currentUser.teacherId].schoolId,s=db.schools[sId],pts=(n/(s.itemsPerFive||1))*5,th=s.pointsPerPrize||100,cross=(currentUser.score+pts)>=th;if(n>=3){const html=`<div class="space-y-2 text-left"><div class="flex justify-between bg-white/5 rounded-lg p-2.5"><span class="text-slate-400 text-xs">Items</span><span class="text-white font-bold text-xs">${n}</span></div><div class="flex justify-between bg-white/5 rounded-lg p-2.5"><span class="text-slate-400 text-xs">Points</span><span class="accent-text font-bold text-xs">+${pts.toFixed(0)}</span></div>${cross?`<div class="flex justify-between bg-amber-400/10 border border-amber-400/20 rounded-lg p-2.5"><span class="text-amber-400 text-xs font-bold">🎉 Reward!</span><span class="text-amber-400 font-bold text-xs">+${s.prizeValue} ${s.prizeName}</span></div>`:''}</div>`;showConfirm(`Submit ${n} Items?`,`Log ${n} recycled items.`,'♻️',`Submit ${n}`,()=>submitPointsByItem(n),html);}else{submitPointsByItem(n);}}
+function requestCustomSubmit(){openStyledModal({title:'Custom Submit',subtitle:'How many items?',emoji:'♻️',fields:[{label:'Number of Items',type:'number',placeholder:'10',min:1,max:500}],submitLabel:'Submit',onSubmit:(v)=>{const n=Math.floor(v[0]);if(isNaN(n)||n<=0){showToast('Invalid','error','❌');return;}requestSubmit(n);}});}
+function submitPointsByItem(n){
+    const sId=db.teachers[currentUser.teacherId].schoolId,s=db.schools[sId],pts=(n/(s.itemsPerFive||1))*5;
+    SFX.submit();
+    currentUser.score+=pts;currentUser.totalLifetime+=pts;updateStreak(currentUser);updateWeeklyData(currentUser,n);
+    logActivity(currentUser,`Submitted ${n} item${n>1?'s':''} (+${pts.toFixed(0)} pts)`);
+    addNetworkFeedItem(`${db.teachers[currentUser.teacherId]?.name||''}'s ${currentUser.name} logged ${n} items`,'♻️');
+    const th=s.pointsPerPrize||100,val=s.prizeValue!==undefined?s.prizeValue:25;let mile=false;
+    while(currentUser.score>=th){currentUser.score-=th;currentUser.colts+=val;mile=true;}
+    if(mile){SFX.reward();logActivity(currentUser,`Earned +${val} ${s.prizeName}! 🎉`);}
+    checkClassBadges(currentUser);updateClassUI();
+    const nb=CLASS_BADGES.find(b=>Math.floor(currentUser.totalLifetime)<b.threshold);
+    const si=[{icon:'♻️',label:'Items Logged',value:`${n}`,color:'text-white'},{icon:'⭐',label:'Points Earned',value:`+${pts.toFixed(0)}`,color:'accent-text'}];
+    if(mile)si.push({icon:'🎉',label:`${s.prizeName} Earned`,value:`+${val}`,color:'text-amber-400'});
+    if(nb)si.push({icon:nb.emoji,label:`Next: ${nb.label}`,value:`${nb.threshold-Math.floor(currentUser.totalLifetime)} to go`,color:'text-slate-400'});
+    showImpactSummary({emoji:mile?'🎉':'✅',title:mile?`+${val} ${s.prizeName}!`:'Items Logged!',subtitle:mile?'Reward threshold reached!':'Keep up the great work!',items:si});
+}
+
+// === END OF PART 1 === //
+// === PASTE PART 2 DIRECTLY BELOW THIS LINE === //
+function renderTeacherTabs(){let tP=Object.values(db.periods).filter(p=>p.teacherId===currentTeacher.id);tP.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));currentTeacher.lifetime=Math.floor(tP.reduce((a,p)=>a+p.totalLifetime,0));document.getElementById('teacherTotalImpactDisplay').innerText=currentTeacher.lifetime.toLocaleString();save();const c=document.getElementById('teacherPeriodTabs');c.innerHTML='';if(!tP.length){c.innerHTML=`<p class="text-slate-500 text-sm">No classes yet. Use ⚙️ Settings to add periods.</p>`;document.getElementById('activePeriodContainer').innerHTML=`<div class="empty-state"><div class="empty-state-icon"><span>📚</span></div><p class="text-slate-400 font-semibold">No classes to show</p></div>`;return;}if(!activePeriodId||!db.periods[activePeriodId])activePeriodId=tP[0].id;tP.forEach(p=>{const act=p.id===activePeriodId,em=p.emblem?.emoji||'🌿';c.innerHTML+=`<button onclick="switchTeacherTab('${p.id}')" class="px-5 py-2.5 rounded-xl font-bold text-xs uppercase border transition whitespace-nowrap ${act?'accent-bg text-black accent-border shadow-md':'bg-black/30 text-slate-400 border-white/6 hover:text-white hover:border-white/15'}">${em} ${p.name}</button>`;});renderActivePeriod();}
+function switchTeacherTab(id){activePeriodId=id;const p=db.periods[id];if(p)applyTheme(p.theme||'theme-forest');renderTeacherTabs();}
+function renderActivePeriod(){const p=db.periods[activePeriodId];if(!p)return;const s=db.schools[currentTeacher.schoolId];let est=p.students>0?(p.colts/p.students).toFixed(2):'0.00';
+    const goalHTML=p.goal?`<div class="mt-5 pt-4 border-t border-white/6"><div class="flex justify-between text-xs font-bold mb-1.5"><span class="text-slate-400 uppercase tracking-wider">🎯 Class Goal</span><span class="accent-text">${Math.floor(p.totalLifetime)} / ${p.goal.target}</span></div><div class="goal-bar-track"><div class="goal-bar-fill" style="width:${Math.min((p.totalLifetime/p.goal.target)*100,100)}%"></div></div>${p.goal.reward?`<p class="text-[10px] text-amber-400 mt-1.5">🏆 ${p.goal.reward}</p>`:''}</div>`:'';
+    const badgesHTML=(p.earnedBadges&&p.earnedBadges.length>0)?`<div class="mt-5 pt-4 border-t border-white/6"><p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">🏅 Badges (${p.earnedBadges.length}/${CLASS_BADGES.length})</p><div class="flex flex-wrap gap-1.5">${CLASS_BADGES.filter(b=>p.earnedBadges.includes(b.id)).map(b=>`<span class="inline-flex items-center gap-1 bg-white/6 border border-white/10 px-2 py-0.5 rounded-lg text-[10px] font-bold text-white">${b.emoji} ${b.label}</span>`).join('')}</div></div>`:'';
+    const unlocked=getUnlockedThemeCount(p);
+    const themeHTML=`<div class="mt-5 pt-4 border-t border-white/6"><div class="flex items-center justify-between mb-1"><p class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">🎨 Themes: ${unlocked}/${THEMES.length} unlocked</p><p class="text-[10px] text-slate-600">Current: ${THEME_NAMES[THEMES.indexOf(p.theme||'theme-forest')]}</p></div><p class="text-[10px] text-slate-600">Every 5 badges the class earns together unlocks a new theme for everyone!</p></div>`;
+    document.getElementById('activePeriodContainer').innerHTML=`<div class="flex flex-col sm:flex-row justify-between items-start mb-5 gap-3"><div><h3 class="text-2xl font-black uppercase accent-text">${p.name}</h3><p class="text-xs font-medium text-slate-500 mt-0.5">Code: <span class="text-white bg-white/8 px-2 py-0.5 rounded font-mono">${p.id}</span></p></div><div class="flex items-center gap-2"><span class="text-sm font-bold text-white">${p.students} students</span><button onclick="teacherEditStudents()" class="bg-white/8 text-white p-1.5 rounded-lg transition hover:accent-bg hover:text-black"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button></div></div><div class="grid grid-cols-3 gap-3 mb-5"><div class="stat-mini glass-card rounded-xl text-center"><p class="text-[10px] text-slate-500 font-bold uppercase">Points</p><p class="text-2xl font-black text-white">${Math.floor(p.score)}</p></div><div class="stat-mini glass-card rounded-xl text-center"><p class="text-[10px] text-slate-500 font-bold uppercase">${s.prizeName}</p><p class="text-2xl font-black accent-text">${p.colts}</p></div><div class="stat-mini glass-card rounded-xl text-center"><p class="text-[10px] text-slate-500 font-bold uppercase">Per Student</p><p class="text-2xl font-black text-amber-400">${est}</p></div></div>${goalHTML}<div class="flex flex-wrap gap-2 mt-5"><button onclick="teacherAdjustPoints(5)" class="accent-bg text-black px-5 py-2.5 rounded-xl font-bold uppercase text-xs shadow-md hover:opacity-90 transition">+5 Pts</button><button onclick="teacherAdjustPoints(-5)" class="bg-red-500/80 text-white px-5 py-2.5 rounded-xl font-bold uppercase text-xs hover:bg-red-500 transition">-5 Pts</button><button onclick="teacherBulkEntry()" class="bg-white/6 border border-white/8 text-white px-5 py-2.5 rounded-xl font-bold uppercase text-xs hover:accent-bg hover:text-black transition">📦 Bulk</button><button onclick="teacherSetGoal()" class="bg-white/6 border border-white/8 text-white px-5 py-2.5 rounded-xl font-bold uppercase text-xs hover:bg-amber-400 hover:text-black hover:border-amber-400 transition">🎯 ${p.goal?'Edit Goal':'Set Goal'}</button></div>${badgesHTML}${themeHTML}`;}
+
+function teacherEditStudents(){let p=db.periods[activePeriodId];openStyledModal({title:'Edit Student Count',subtitle:`Update ${p.name}`,emoji:'👥',fields:[{label:'Number of Students',type:'number',placeholder:'30',default:p.students,min:0}],submitLabel:'Update',onSubmit:(v)=>{const c=Math.floor(v[0]);if(!isNaN(c)&&c>=0){p.students=c;save();renderTeacherTabs();showToast('Student count updated','success','👥',2000);}}});}
+function teacherAdjustPoints(amt){let p=db.periods[activePeriodId];p.score=Math.max(0,p.score+amt);if(amt>0){p.totalLifetime+=amt;}else{p.totalLifetime=Math.max(0,p.totalLifetime+amt);}const s=db.schools[currentTeacher.schoolId],th=s.pointsPerPrize||100,val=s.prizeValue!==undefined?s.prizeValue:25;while(p.score>=th){p.score-=th;p.colts+=val;}if(amt>0){SFX.plus();checkClassBadges(p);}else SFX.minus();save();renderTeacherTabs();}
+function teacherBulkEntry(){let p=db.periods[activePeriodId];const s=db.schools[currentTeacher.schoolId];openStyledModal({title:'Bulk Entry',subtitle:`Add items for ${p.name}`,emoji:'📦',fields:[{label:'Number of Items',type:'number',placeholder:'25',min:1,hint:`Each item earns ${(5/(s.itemsPerFive||1)).toFixed(1)} points`}],submitLabel:'Log Items',onSubmit:(v)=>{const n=Math.floor(v[0]);if(isNaN(n)||n<=0)return;const pts=(n/(s.itemsPerFive||1))*5;showConfirm(`Bulk: ${n} Items`,`Add ${n} items for ${p.name}? (+${pts.toFixed(0)} pts)`,'📦','Confirm',()=>{p.score+=pts;p.totalLifetime+=pts;const th=s.pointsPerPrize||100,val=s.prizeValue!==undefined?s.prizeValue:25;while(p.score>=th){p.score-=th;p.colts+=val;}checkClassBadges(p);save();renderTeacherTabs();addNetworkFeedItem(`${currentTeacher.name}'s ${p.name} logged ${n} items (bulk)`,'📦');showToast(`Bulk logged: ${n} items`,'success','📦',3000);SFX.submit();});}});}
+function teacherSetGoal(){let p=db.periods[activePeriodId];openStyledModal({title:p.goal?'Edit Class Goal':'Set Class Goal',subtitle:`Set a target for ${p.name}`,emoji:'🎯',fields:[{label:'Target (items)',type:'number',placeholder:'100',default:p.goal?.target||'',min:0,hint:'Enter 0 to remove the goal'},{label:'Reward (optional)',type:'text',placeholder:'Pizza party, etc.',default:p.goal?.reward||''}],submitLabel:p.goal?'Update Goal':'Set Goal',submitClass:'modal-btn-amber',onSubmit:(v)=>{const t=Math.floor(v[0]),r=v[1]||'';if(isNaN(t))return;if(t<=0){p.goal=null;showToast('Goal removed','success','🎯',2000);}else{p.goal={target:t,reward:r};p.goalCompleted=false;showToast(`Goal: ${t} items${r?' — '+r:''}`,'success','🎯',3000);}save();renderTeacherTabs();}});}
+
+function teacherAdvancedSettings(){SFX.open();renderAdvSettingsPeriods();document.getElementById('advancedSettingsOverlay').classList.add('active');}
+function closeAdvancedSettings(){document.getElementById('advancedSettingsOverlay').classList.remove('active');renderTeacherTabs();}
+function renderAdvSettingsPeriods(){const l=document.getElementById('advSettingsPeriodList');let tP=Object.values(db.periods).filter(p=>p.teacherId===currentTeacher.id);tP.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));if(!tP.length){l.innerHTML='<p class="text-slate-500 text-sm">No periods yet. Add your first one below!</p>';return;}l.innerHTML=tP.map(p=>{const em=p.emblem?.emoji||'🌿';return `<div class="adv-period-chip" id="adv-chip-${p.id}"><button class="emoji-picker-btn" onclick="toggleEmojiPicker('${p.id}')" title="Change emoji">${em}</button><span>${p.name}</span><span class="text-[10px] text-slate-500 font-mono">${p.id}</span><button class="chip-remove" onclick="advSettingsRemovePeriod('${p.id}')" title="Remove">✕</button></div>`;}).join('');l.innerHTML+='<div id="advEmojiPickerArea"></div>';}
+function toggleEmojiPicker(id){const area=document.getElementById('advEmojiPickerArea');if(!area)return;const p=db.periods[id];if(!p)return;if(area.dataset.activeId===id&&!area.classList.contains('hidden')){area.innerHTML='';area.dataset.activeId='';return;}area.dataset.activeId=id;area.innerHTML=`<div class="mt-3 p-3 bg-black/30 border border-white/10 rounded-xl"><p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Pick emoji for: <span class="text-white">${p.emblem?.emoji||'🌿'} ${p.name}</span></p><div style="display:grid;grid-template-columns:repeat(8,1fr);gap:0.25rem;">${PERIOD_EMOJIS.map(e=>`<button onclick="setPeriodEmoji('${id}','${e}')" style="background:none;border:none;font-size:1.25rem;padding:0.375rem;border-radius:0.5rem;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='rgba(var(--accent-rgb),0.2)';this.style.transform='scale(1.15)'" onmouseout="this.style.background='none';this.style.transform='scale(1)'">${e}</button>`).join('')}</div></div>`;}
+function setPeriodEmoji(id,em){const p=db.periods[id];if(!p)return;if(!p.emblem)p.emblem={emoji:'🌿',color:'lime'};p.emblem.emoji=em;save();renderAdvSettingsPeriods();SFX.tap();showToast(`${p.name} emoji → ${em}`,'success',em,2000);}
+function advSettingsAddPeriod(){const inp=document.getElementById('advSettingsNewPeriod'),v=inp.value.trim();if(!v){SFX.error();showToast('Enter a period number or name','error','❌');return;}const isNum=/^\d+$/.test(v),name=isNum?`Period ${v}`:v;const existing=Object.values(db.periods).filter(p=>p.teacherId===currentTeacher.id);if(existing.some(p=>p.name.toLowerCase()===name.toLowerCase())){SFX.error();showToast(`"${name}" already exists`,'error','❌');inp.value='';return;}const pId=genCode();db.periods[pId]={id:pId,teacherId:currentTeacher.id,name,students:30,score:0,colts:0,totalLifetime:0,goal:null,earnedBadges:[],activityLog:[],streak:{count:0,lastDate:null},weeklyData:[0,0,0,0,0,0,0],emblem:{emoji:'🌿',color:'lime'},theme:'theme-forest'};save();inp.value='';renderAdvSettingsPeriods();SFX.click();showToast(`${name} added!`,'success','📚',2000);}
+function advSettingsRemovePeriod(pId){const p=db.periods[pId];if(!p)return;showConfirm(`Remove ${p.name}?`,p.totalLifetime>0?`"${p.name}" has data. Permanently delete?`:`Remove "${p.name}"?`,'⚠️','Remove',()=>{delete db.periods[pId];if(activePeriodId===pId){const rem=Object.values(db.periods).filter(pp=>pp.teacherId===currentTeacher.id);activePeriodId=rem.length>0?rem[0].id:null;}save();renderAdvSettingsPeriods();showToast(`${p.name} removed`,'success','🗑️',2000);});}
+
+function downloadCSV(fn,rows){const csv=rows.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');const b=new Blob([csv],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=fn;a.click();}
+function exportTeacherCSV(){const tP=Object.values(db.periods).filter(p=>p.teacherId===currentTeacher.id),s=db.schools[currentTeacher.schoolId],rows=[['Class','Code','Students','Points',s.prizeName,'Lifetime','Badges']];tP.forEach(p=>rows.push([p.name,p.id,p.students,Math.floor(p.score),p.colts,Math.floor(p.totalLifetime),(p.earnedBadges||[]).length]));downloadCSV(`ecolink_${currentTeacher.name.replace(/\s+/g,'_')}.csv`,rows);showToast('CSV exported!','success','📥',2500);}
+function exportSchoolCSV(){const teachers=Object.values(db.teachers).filter(t=>t.schoolId===currentSchool.id),rows=[['Teacher','Code','Period','Students','Points',currentSchool.prizeName,'Lifetime','Badges']];teachers.forEach(t=>{Object.values(db.periods).filter(p=>p.teacherId===t.id).forEach(p=>rows.push([t.name,t.code,p.name,p.students,Math.floor(p.score),p.colts,Math.floor(p.totalLifetime),(p.earnedBadges||[]).length]));});downloadCSV(`ecolink_${currentSchool.name.replace(/\s+/g,'_')}.csv`,rows);showToast('School CSV exported!','success','📥',2500);}
+function renderAnalyticsChart(){const teachers=Object.values(db.teachers).filter(t=>t.schoolId===currentSchool.id),labels=[],data=[];teachers.forEach(t=>{Object.values(db.periods).filter(p=>p.teacherId===t.id).forEach(p=>{labels.push(`${t.name} (${p.name})`);data.push(Math.floor(p.totalLifetime));});});const emEl=document.getElementById('analyticsEmpty'),canvas=document.getElementById('analyticsChart');if(!data.length){emEl.style.display='block';canvas.style.display='none';return;}emEl.style.display='none';canvas.style.display='block';if(analyticsChartInstance)analyticsChartInstance.destroy();analyticsChartInstance=new Chart(canvas,{type:'bar',data:{labels,datasets:[{label:'Lifetime Items',data,backgroundColor:data.map((_,i)=>`hsla(${100+(i*30)%60},70%,55%,0.85)`),borderRadius:6,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:true,plugins:{legend:{display:false},tooltip:{backgroundColor:'#1a2e1e',titleColor:'#a3e635',bodyColor:'#fff',borderColor:'rgba(163,230,53,0.2)',borderWidth:1,cornerRadius:8,padding:10,callbacks:{label:ctx=>`${ctx.parsed.y} items`}}},scales:{x:{ticks:{color:'#64748b',font:{size:10,weight:600},maxRotation:30},grid:{display:false}},y:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(255,255,255,0.04)'}}}}});}
+
+function renderStaffDashboard(){document.getElementById('schoolRewardDisplay').innerText=`${currentSchool.pointsPerPrize} Pts = ${currentSchool.prizeValue} ${currentSchool.prizeName}`;document.getElementById('schoolItemRatioDisplay').innerText=`${currentSchool.itemsPerFive} Item(s) = 5 Pts`;const list=document.getElementById('schoolTeachersList'),emEl=document.getElementById('schoolTeachersEmpty');list.innerHTML='';let tList=Object.values(db.teachers).filter(t=>t.schoolId===currentSchool.id);tList.sort((a,b)=>b.lifetime-a.lifetime);if(!tList.length){emEl?.classList.remove('hidden');}else{emEl?.classList.add('hidden');}tList.forEach(t=>{let periods=Object.values(db.periods).filter(p=>p.teacherId===t.id),pNames=periods.map(p=>p.name).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})),pDisplay=pNames.length>0?pNames.join(', '):'No periods';list.innerHTML+=`<tr class="border-b border-white/4 hover:bg-white/3 transition"><td class="py-3.5 px-5 text-white font-semibold">${t.name}<span class="block text-[10px] text-slate-500">${pDisplay}</span></td><td class="py-3.5 px-5 text-amber-400 font-mono text-xs hidden sm:table-cell">${t.code}</td><td class="py-3.5 px-5 text-white font-black">${Math.floor(t.lifetime)}</td><td class="py-3.5 px-5 text-right"><div class="flex gap-1.5 justify-end"><button onclick="staffEditTeacher('${t.id}')" class="text-white bg-white/6 hover:bg-white/12 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit</button><button onclick="staffDeleteTeacher('${t.id}')" class="text-red-400 bg-red-500/8 hover:bg-red-500/20 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button></div></td></tr>`;});renderAnalyticsChart();}
+function staffEditReward(){openStyledModal({title:'Edit Reward Rules',subtitle:'Configure points and rewards',emoji:'⚙️',fields:[{label:'Prize Name',type:'text',placeholder:'Eco Cash',default:currentSchool.prizeName},{label:'Items per 5 Points',type:'number',placeholder:'1',default:currentSchool.itemsPerFive,min:1},{label:'Points per Reward',type:'number',placeholder:'100',default:currentSchool.pointsPerPrize,min:1},{label:'Reward Value',type:'number',placeholder:'25',default:currentSchool.prizeValue,min:1}],submitLabel:'Save Rules',submitClass:'modal-btn-amber',onSubmit:(v)=>{const[name,items,pts,val]=v;if(!name||isNaN(items)||items<=0||isNaN(pts)||pts<=0||isNaN(val)||val<=0){showToast('Invalid values','error','❌');return;}currentSchool.prizeName=name;currentSchool.itemsPerFive=Math.floor(items);currentSchool.pointsPerPrize=Math.floor(pts);currentSchool.prizeValue=Math.floor(val);save();renderStaffDashboard();showToast('Rules updated!','success','✅',2000);}});}
+function staffEditTeacher(tId){let t=db.teachers[tId],pList=Object.values(db.periods).filter(p=>p.teacherId===tId);pList.sort((a,b)=>a.name.localeCompare(b.name,undefined,{numeric:true,sensitivity:'base'}));let curNames=pList.map(p=>{const m=p.name.match(/^Period\s+(\d+)$/i);return m?m[1]:p.name;}).join(', ');openStyledModal({title:'Edit Teacher',subtitle:`Modify ${t.name}`,emoji:'👩‍🏫',fields:[{label:'Teacher Name',type:'text',default:t.name},{label:'Teacher Code (6 digits)',type:'text',default:t.code},{label:'Periods (comma-separated)',type:'text',default:curNames,hint:'e.g. "1, 2, 3, Advisory"'}],submitLabel:'Save Changes',onSubmit:(v)=>{const[newName,newCode,periodStr]=v;if(!newName||!newCode||newCode.length!==6){showToast('Code must be 6 digits','error','❌');return;}t.name=newName;t.code=newCode.toUpperCase();const desired=periodStr.split(',').map(s=>s.trim()).filter(s=>s.length>0).map(s=>/^\d+$/.test(s)?`Period ${s}`:s);const byName={};pList.forEach(p=>{byName[p.name.toLowerCase()]=p;});const keep=new Set();desired.forEach(name=>{const k=name.toLowerCase();if(byName[k])keep.add(k);else{const pid=genCode();db.periods[pid]={id:pid,teacherId:tId,name,students:30,score:0,colts:0,totalLifetime:0,goal:null,earnedBadges:[],activityLog:[],streak:{count:0,lastDate:null},weeklyData:[0,0,0,0,0,0,0],emblem:{emoji:'🌿',color:'lime'},theme:'theme-forest'};keep.add(k);}});pList.forEach(p=>{if(!keep.has(p.name.toLowerCase()))delete db.periods[p.id];});save();renderStaffDashboard();showToast('Teacher updated!','success','✅',2000);}});}
+function staffAddTeacher(){openStyledModal({title:'Add Teacher',subtitle:'Set up a new teacher',emoji:'👩‍🏫',fields:[{label:'Teacher Name',type:'text',placeholder:'Ms. Johnson'},{label:'Periods (comma-separated)',type:'text',placeholder:'1, 2, 3, 5, 6',hint:'Enter period numbers or custom names.'}],submitLabel:'Add Teacher',submitClass:'modal-btn-amber',onSubmit:(v)=>{const[name,periodStr]=v;if(!name){showToast('Name required','error','❌');return;}const entries=periodStr.split(',').map(s=>s.trim()).filter(s=>s.length>0);if(!entries.length){showToast('Enter at least one period','error','❌');return;}const tId='TCH-'+genCode(),tCode=genCode();db.teachers[tId]={id:tId,schoolId:currentSchool.id,name,code:tCode,lifetime:0};entries.forEach(e=>{const pName=/^\d+$/.test(e)?`Period ${e}`:e,pId=genCode();db.periods[pId]={id:pId,teacherId:tId,name:pName,students:30,score:0,colts:0,totalLifetime:0,goal:null,earnedBadges:[],activityLog:[],streak:{count:0,lastDate:null},weeklyData:[0,0,0,0,0,0,0],emblem:{emoji:'🌿',color:'lime'},theme:'theme-forest'};});save();renderStaffDashboard();addNetworkFeedItem(`${name} joined ${currentSchool.name}`,'👩‍🏫');showToast(`${name} added with ${entries.length} period${entries.length>1?'s':''}`,'success','👩‍🏫',3000);}});}
+function staffDeleteTeacher(id){showConfirm('Delete Teacher?','This will remove the teacher and all data permanently.','⚠️','Delete',()=>{Object.keys(db.periods).forEach(k=>{if(db.periods[k].teacherId===id)delete db.periods[k];});delete db.teachers[id];save();renderStaffDashboard();showToast('Teacher removed','success','🗑️',2000);});}
+
+function renderNetworkDashboard(){const list=document.getElementById('networkSchoolsList'),emEl=document.getElementById('networkEmpty');list.innerHTML='';const schools=Object.values(db.schools);if(!schools.length){emEl?.classList.remove('hidden');}else{emEl?.classList.add('hidden');}schools.forEach(s=>{let tCount=Object.values(db.teachers).filter(t=>t.schoolId===s.id).length,impact=Object.values(db.teachers).filter(t=>t.schoolId===s.id).reduce((a,t)=>a+t.lifetime,0);s.lifetime=Math.floor(impact);list.innerHTML+=`<tr class="border-b border-white/4 hover:bg-white/3 transition"><td class="py-3.5 px-5 text-white font-semibold">${s.name}</td><td class="py-3.5 px-5 text-red-400 font-mono text-xs">${s.code}</td><td class="py-3.5 px-5 text-slate-400 font-semibold">${tCount}</td><td class="py-3.5 px-5 text-white font-black">${s.lifetime.toLocaleString()}</td><td class="py-3.5 px-5 text-right"><div class="flex gap-1.5 justify-end"><button onclick="networkEditSchool('${s.id}')" class="text-white bg-white/6 hover:bg-white/12 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit</button><button onclick="networkDeleteSchool('${s.id}')" class="text-red-500 bg-red-500/8 hover:bg-red-500/20 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button></div></td></tr>`;});save();}
+function networkEditSchool(sId){let s=db.schools[sId];openStyledModal({title:'Edit School',subtitle:`Modify ${s.name}`,emoji:'🏫',fields:[{label:'School Name',type:'text',default:s.name},{label:'Staff Code',type:'text',default:s.code}],submitLabel:'Save',submitClass:'modal-btn-danger',onSubmit:(v)=>{if(!v[0]||!v[1])return;s.name=v[0];s.code=v[1].toUpperCase();save();renderNetworkDashboard();showToast('School updated!','success','✅',2000);}});}
+function networkAddSchool(){openStyledModal({title:'Add School',subtitle:'Register a new school',emoji:'🏫',fields:[{label:'School Name',type:'text',placeholder:'Oak Ridge Middle School'}],submitLabel:'Add School',submitClass:'modal-btn-danger',onSubmit:(v)=>{if(!v[0]){showToast('Name required','error','❌');return;}const sId='SCH-'+genCode(),sCode='STAFF-'+genCode().slice(0,4);db.schools[sId]={id:sId,name:v[0],code:sCode,lifetime:0,pointsPerPrize:100,prizeValue:25,prizeName:'Eco Cash',itemsPerFive:1,recyclables:getDefaultRecyclables()};save();renderNetworkDashboard();addNetworkFeedItem(`${v[0]} joined the network!`,'🏫');showToast(`${v[0]} added`,'success','🏫',3000);}});}
+function networkDeleteSchool(sId){showConfirm('Delete School?','This will remove this school and all data.','⚠️','Delete',()=>{Object.keys(db.teachers).forEach(tId=>{if(db.teachers[tId].schoolId===sId){Object.keys(db.periods).forEach(pId=>{if(db.periods[pId].teacherId===tId)delete db.periods[pId];});delete db.teachers[tId];}});delete db.schools[sId];save();renderNetworkDashboard();showToast('School removed','success','🗑️',2000);});}
+function resetNetwork(){showConfirm('Factory Reset?','This will wipe ALL data.','🔴','Continue',()=>{openStyledModal({title:'Confirm Reset',subtitle:'Type RESET to confirm',emoji:'🔴',fields:[{label:'Type RESET to confirm',type:'text',placeholder:'RESET'}],submitLabel:'Factory Reset',submitClass:'modal-btn-danger',onSubmit:(v)=>{if(v[0]==='RESET'){localStorage.removeItem('ecolink_v5');localStorage.removeItem('ecolink_onboarded');localStorage.removeItem('ecolink_theme');location.reload();}else showToast('Reset cancelled','error','❌');}});});}
+
+function sortSchoolLB(mode,btn){schoolLBSort=mode;btn.parentElement.querySelectorAll('.lb-sort-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');updatePublicLeaderboards();}
+function sortClassLB(mode,btn){classLBSort=mode;btn.parentElement.querySelectorAll('.lb-sort-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');updatePublicLeaderboards();}
+function filterSchoolLB(v){schoolLBFilter=v.toLowerCase();updatePublicLeaderboards();}
+function filterClassLB(v){classLBFilter=v.toLowerCase();updatePublicLeaderboards();}
+function animateCounter(el,target,dur=1200){const start=parseInt(el.innerText.replace(/,/g,''))||0;if(start===target)return;const st=performance.now();function tick(now){const e=now-st,p=Math.min(e/dur,1),ease=1-Math.pow(1-p,3);el.innerText=Math.floor(start+(target-start)*ease).toLocaleString();if(p<1)requestAnimationFrame(tick);}requestAnimationFrame(tick);}
+function getRankBadge(i){if(i===0)return `<span class="rank-1">🥇</span>`;if(i===1)return `<span class="rank-2">🥈</span>`;if(i===2)return `<span class="rank-3">🥉</span>`;return `<span class="font-black text-slate-400 text-base w-8 inline-block text-center">${i+1}</span>`;}
+
+function updatePublicLeaderboards(){
+    let global=0;Object.values(db.periods).forEach(p=>global+=(p.totalLifetime||0));
+    const impEl=document.getElementById('totalImpact');if(impEl)animateCounter(impEl,Math.floor(global));
+    const slb=document.getElementById('schoolLeaderboardList');if(!slb)return;
+    let sArr=Object.values(db.schools).map(s=>{let st=0;Object.values(db.teachers).filter(t=>t.schoolId===s.id).forEach(t=>{Object.values(db.periods).filter(p=>p.teacherId===t.id).forEach(p=>st+=(p.totalLifetime||0));});s.lifetime=Math.floor(st);return s;});
+    if(schoolLBFilter)sArr=sArr.filter(s=>s.name.toLowerCase().includes(schoolLBFilter));
+    sArr.sort((a,b)=>b.lifetime-a.lifetime);
+    if(!sArr.length){slb.innerHTML=`<div class="empty-state py-8"><div class="empty-state-icon"><span>🏫</span></div><p class="text-slate-400 font-semibold text-sm">${schoolLBFilter?'No matches':'No schools yet'}</p></div>`;}
+    else{slb.innerHTML=sArr.map((s,i)=>`<div class="flex justify-between items-center p-4 lb-row"><div class="flex items-center gap-3">${getRankBadge(i)}<span class="uppercase font-bold text-sm ${i===0?'text-amber-600':''}">${s.name}</span></div><span class="font-black text-slate-900 bg-slate-50 px-3 py-1 rounded-lg text-sm">${s.lifetime.toLocaleString()}</span></div>`).join('');}
+    const clb=document.getElementById('publicLeaderboardList');let pArr=Object.values(db.periods);
+    if(classLBFilter)pArr=pArr.filter(p=>{const t=db.teachers[p.teacherId],s=t?db.schools[t.schoolId]:null;return `${t?.name||''} ${p.name} ${s?.name||''}`.toLowerCase().includes(classLBFilter);});
+    if(classLBSort==='current')pArr.sort((a,b)=>b.score-a.score);else pArr.sort((a,b)=>b.totalLifetime-a.totalLifetime);
+    pArr=pArr.slice(0,10);
+    if(!pArr.length){clb.innerHTML=`<div class="empty-state py-8"><div class="empty-state-icon"><span>📚</span></div><p class="text-slate-400 font-semibold text-sm">${classLBFilter?'No matches':'No entries yet'}</p></div>`;}
+    else{clb.innerHTML=pArr.map((p,i)=>`<div class="flex justify-between items-center p-3.5 lb-row"><div class="flex items-center gap-3">${getRankBadge(i)}<div class="flex flex-col"><span class="uppercase font-bold text-sm ${i===0?'text-amber-600':''}">${db.teachers[p.teacherId]?.name||'Teacher'} · ${p.name}</span><span class="text-[10px] text-slate-400 font-medium">${db.schools[db.teachers[p.teacherId]?.schoolId]?.name||''}</span></div></div><span class="font-black text-slate-900 bg-slate-50 px-3 py-1 rounded-lg text-sm">${classLBSort==='current'?Math.floor(p.score).toLocaleString():Math.floor(p.totalLifetime).toLocaleString()}</span></div>`).join('');}
+    renderNetworkFeed();
+    // Re-trigger stagger animations
+    document.querySelectorAll('.stagger-children').forEach(el=>{if(el.classList.contains('visible')){el.classList.remove('visible');requestAnimationFrame(()=>el.classList.add('visible'));}});
+}
+
+function initLeaves(){const canvas=document.getElementById('leaf-canvas');if(!canvas)return;const ctx=canvas.getContext('2d');let W,H,leaves=[];function resize(){W=canvas.width=canvas.offsetWidth;H=canvas.height=canvas.offsetHeight;}resize();window.addEventListener('resize',resize);function drawLeaf(ctx,x,y,size,rot,op){ctx.save();ctx.translate(x,y);ctx.rotate(rot);ctx.globalAlpha=op;ctx.beginPath();ctx.moveTo(0,-size);ctx.bezierCurveTo(size*.8,-size*.5,size*.8,size*.5,0,size);ctx.bezierCurveTo(-size*.8,size*.5,-size*.8,-size*.5,0,-size);ctx.fillStyle='rgba(163,230,53,0.5)';ctx.fill();ctx.beginPath();ctx.moveTo(0,-size);ctx.lineTo(0,size);ctx.strokeStyle='rgba(101,163,13,0.3)';ctx.lineWidth=size*.08;ctx.stroke();ctx.restore();}for(let i=0;i<14;i++){leaves.push({x:Math.random()*1400,y:Math.random()*900+100,size:5+Math.random()*9,rotation:Math.random()*Math.PI*2,rotSpeed:(Math.random()-.5)*.012,vx:(Math.random()-.5)*.25,vy:-.2-Math.random()*.3,opacity:.04+Math.random()*.1,drift:Math.random()*Math.PI*2,driftSpeed:.004+Math.random()*.006});}function animate(){ctx.clearRect(0,0,W,H);leaves.forEach(l=>{l.drift+=l.driftSpeed;l.x+=l.vx+Math.sin(l.drift)*.35;l.y+=l.vy;l.rotation+=l.rotSpeed;if(l.y<-20){l.y=H+20;l.x=Math.random()*W;}drawLeaf(ctx,l.x,l.y,l.size,l.rotation,l.opacity);});requestAnimationFrame(animate);}animate();}
+function initScrollAnimations(){const obs=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible');else e.target.classList.remove('visible');});},{threshold:0.1,rootMargin:'0px 0px -40px 0px'});document.querySelectorAll('.reveal,.reveal-left,.reveal-right,.reveal-scale,.stagger-children').forEach(el=>obs.observe(el));}
+function initNavShrink(){const nav=document.getElementById('mainNav');window.addEventListener('scroll',()=>nav.classList.toggle('scrolled',window.scrollY>60));}
+window.addEventListener('DOMContentLoaded',()=>{
+    const mg=document.getElementById('mouseGlow');
+    if(mg){
+        let mx=0,my=0,cx=0,cy=0;
+        document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+        function animate(){
+            cx+=(mx-cx)*0.15;cy+=(my-cy)*0.15;
+            mg.style.left=`${cx}px`;mg.style.top=`${cy}px`;
+            requestAnimationFrame(animate);
+        }
+        animate();
+    }
+
+    // --- SUPABASE INITIALIZATION & REALTIME SYNC ---
+    const _supabaseUrl = 'https://boznqpdyvaqrniapmant.supabase.co';
+    const _supabaseAnonKey = 'sb_publishable_wiyny2_1QspHPrmDDXupZg_2vD_5RML';
+    
+    // Using supabaseClient prevents the browser reference collision error
+    const supabaseClient = supabase.createClient(_supabaseUrl, _supabaseAnonKey);
+
+    const ecostreamChannel = supabaseClient
+        .channel('public-room-changes')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'leaderboard' }, (payload) => {
+            console.log('Realtime update received from Supabase:', payload);
+            
+            if (typeof initLeaderboard === 'function') {
+                initLeaderboard(); 
+            }
+            
+            if (payload.new && typeof showToast === 'function') {
+                showToast(`EcoLink data updated: ${payload.new.username || 'System synced'}`, 'success');
+            }
+        })
+        .subscribe((status) => {
+            if (status === 'SUBSCRIBED') {
+                console.log('Successfully connected to Supabase real-time broadcast channel.');
+            }
+        });
+});
+document.addEventListener('click',e=>{if(e.target.closest('button')){const txt=e.target.textContent||'';if(txt.includes('Enter')||txt.includes('Submit')||txt.includes('Confirm'))playTone(850,1100,0.15);else playTone(650,'sine',0.08,0.05);}},true);
+window.onload=()=>{updatePublicLeaderboards();initScrollAnimations();initLeaves();initNavShrink();checkFirstVisit();};
+</script>
+</body>
+</html>
