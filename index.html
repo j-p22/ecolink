@@ -629,7 +629,7 @@ const SFX={tap(){playTone(880,'sine',0.06,0.08);haptic('tap');},click(){playTone
 const CIRCUM=502.6;
 let currentUser=null,currentTeacher=null,currentSchool=null,activePeriodId=null;
 let confirmCallback=null,analyticsChartInstance=null,currentThemeIndex=0;
-let _suppressRealtimeUntil=0;
+const _sessionId = Math.random().toString(36).slice(2);
 const THEMES=['theme-forest','theme-ocean','theme-sunset','theme-night','theme-beachside','theme-rainbow'];
 const THEME_NAMES=['🌿 Forest','🌊 Ocean','🌅 Sunset','🌙 Night','🏖️ Beachside','🌈 Rainbow'];
 const THEME_UNLOCK_REQ=[0,5,10,15,20,25];
@@ -684,18 +684,17 @@ function initDbFields(){
 }
 initDbFields();
 async function save(){
-    _suppressRealtimeUntil = Date.now() + 5000;
     localStorage.setItem('ecolink_v5',JSON.stringify(db));
     if(window.supabaseClient){
         try{
             for(let[id,school]of Object.entries(db.schools||{})){
-                await window.supabaseClient.from('schools').upsert([{id:school.id,name:school.name,code:school.code,lifetime:school.lifetime||0,pointsPerPrize:school.pointsPerPrize||100,prizeValue:school.prizeValue||25,prizeName:school.prizeName||'Eco Cash',itemsPerFive:school.itemsPerFive||1,recyclables:school.recyclables||[]}],{onConflict:'id'}).catch(e=>console.warn('School sync:',e));
+                await window.supabaseClient.from('schools').upsert([{id:school.id,name:school.name,code:school.code,lifetime:school.lifetime||0,pointsPerPrize:school.pointsPerPrize||100,prizeValue:school.prizeValue||25,prizeName:school.prizeName||'Eco Cash',itemsPerFive:school.itemsPerFive||1,recyclables:school.recyclables||[],session_id:_sessionId}],{onConflict:'id'}).catch(e=>console.warn('School sync:',e));
             }
             for(let[id,teacher]of Object.entries(db.teachers||{})){
-                await window.supabaseClient.from('teachers').upsert([{id:teacher.id,schoolId:teacher.schoolId,name:teacher.name,code:teacher.code,lifetime:teacher.lifetime||0}],{onConflict:'id'}).catch(e=>console.warn('Teacher sync:',e));
+                await window.supabaseClient.from('teachers').upsert([{id:teacher.id,schoolId:teacher.schoolId,name:teacher.name,code:teacher.code,lifetime:teacher.lifetime||0,session_id:_sessionId}],{onConflict:'id'}).catch(e=>console.warn('Teacher sync:',e));
             }
             for(let[id,period]of Object.entries(db.periods||{})){
-                await window.supabaseClient.from('periods').upsert([{id:period.id,teacherId:period.teacherId,name:period.name,students:period.students||30,score:period.score||0,colts:period.colts||0,totalLifetime:period.totalLifetime||0,goal:period.goal||null,goalCompleted:period.goalCompleted||false,earnedBadges:(period.earnedBadges||[]),activityLog:period.activityLog||[],streak:period.streak||{count:0,lastDate:null},weeklyData:period.weeklyData||[0,0,0,0,0,0,0],emblem:period.emblem||{emoji:'🌿',color:'lime'},theme:period.theme||'theme-forest'}],{onConflict:'id'}).catch(e=>console.warn('Period sync:',e));
+                await window.supabaseClient.from('periods').upsert([{id:period.id,teacherId:period.teacherId,name:period.name,students:period.students||30,score:period.score||0,colts:period.colts||0,totalLifetime:period.totalLifetime||0,goal:period.goal||null,goalCompleted:period.goalCompleted||false,earnedBadges:(period.earnedBadges||[]),activityLog:period.activityLog||[],streak:period.streak||{count:0,lastDate:null},weeklyData:period.weeklyData||[0,0,0,0,0,0,0],emblem:period.emblem||{emoji:'🌿',color:'lime'},theme:period.theme||'theme-forest',session_id:_sessionId}],{onConflict:'id'}).catch(e=>console.warn('Period sync:',e));
             }
         }catch(e){console.error('Supabase sync:',e);}
     }
@@ -1010,7 +1009,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 window.supabaseClient
     .channel('all-ecolink-changes')
     .on('postgres_changes',{event:'*',schema:'public',table:'schools'},(payload)=>{
-        if(Date.now()<_suppressRealtimeUntil) return;
+        if(payload.new&&payload.new.session_id===_sessionId) return;
         console.log('📍 Schools:',payload.eventType);
         if(payload.new){
             const ex=db.schools[payload.new.id];
@@ -1021,7 +1020,7 @@ window.supabaseClient
         updatePublicLeaderboards();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'teachers'},(payload)=>{
-        if(Date.now()<_suppressRealtimeUntil) return;
+        if(payload.new&&payload.new.session_id===_sessionId) return;
         console.log('👨‍🏫 Teachers:',payload.eventType);
         if(payload.new){
             const ex=db.teachers[payload.new.id];
@@ -1032,7 +1031,7 @@ window.supabaseClient
         updatePublicLeaderboards();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'periods'},(payload)=>{
-        if(Date.now()<_suppressRealtimeUntil) return;
+        if(payload.new&&payload.new.session_id===_sessionId) return;
         console.log('📅 Periods:',payload.eventType);
         if(payload.new){
             const ex=db.periods[payload.new.id];
@@ -1047,7 +1046,6 @@ window.supabaseClient
         updatePublicLeaderboards();
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'networkFeed'},(payload)=>{
-        if(Date.now()<_suppressRealtimeUntil) return;
         console.log('📡 Feed:',payload.eventType);
         if(payload.new&&!db.networkFeed.some(f=>f.id===payload.new.id)) db.networkFeed.unshift(payload.new);
         updatePublicLeaderboards();
