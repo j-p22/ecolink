@@ -629,6 +629,7 @@ const SFX={tap(){playTone(880,'sine',0.06,0.08);haptic('tap');},click(){playTone
 const CIRCUM=502.6;
 let currentUser=null,currentTeacher=null,currentSchool=null,activePeriodId=null;
 let confirmCallback=null,analyticsChartInstance=null,currentThemeIndex=0;
+let _suppressRealtimeUntil=0;
 const THEMES=['theme-forest','theme-ocean','theme-sunset','theme-night','theme-beachside','theme-rainbow'];
 const THEME_NAMES=['🌿 Forest','🌊 Ocean','🌅 Sunset','🌙 Night','🏖️ Beachside','🌈 Rainbow'];
 const THEME_UNLOCK_REQ=[0,5,10,15,20,25];
@@ -673,8 +674,7 @@ const CLASS_BADGES=[
 ];
 
 let db=JSON.parse(localStorage.getItem('ecolink_v5'));
-if(!db){db={schools:{},teachers:{},periods:{},networkFeed:[]};save();}
-if(!db.networkFeed)db.networkFeed=[];
+if(!db){db={schools:{},teachers:{},periods:{},networkFeed:[]};localStorage.setItem('ecolink_v5',JSON.stringify(db));}if(!db.networkFeed)db.networkFeed=[];
 const savedTheme=localStorage.getItem('ecolink_theme');
 if(savedTheme&&THEMES.includes(savedTheme)){currentThemeIndex=THEMES.indexOf(savedTheme);document.body.classList.remove(...THEMES);document.body.classList.add(savedTheme);}
 
@@ -684,6 +684,7 @@ function initDbFields(){
 }
 initDbFields();
 async function save(){
+    _suppressRealtimeUntil = Date.now() + 5000;
     localStorage.setItem('ecolink_v5',JSON.stringify(db));
     if(window.supabaseClient){
         try{
@@ -971,11 +972,33 @@ window.addEventListener('DOMContentLoaded',()=>{
                 window.supabaseClient.from('schools').select('*'),
                 window.supabaseClient.from('teachers').select('*'),
                 window.supabaseClient.from('periods').select('*'),
-                window.supabaseClient.from('networkFeed').select('*').order('created_at',{ascending:false}).limit(50)
+                window.supabaseClient.from('networkFeed').select('*').order('timestamp',{ascending:false}).limit(50)
             ]);
-            if(!schools.error&&schools.data)db.schools=Object.fromEntries(schools.data.map(s=>[s.id,s]));
-            if(!teachers.error&&teachers.data)db.teachers=Object.fromEntries(teachers.data.map(t=>[t.id,t]));
-            if(!periods.error&&periods.data)db.periods=Object.fromEntries(periods.data.map(p=>[p.id,p]));
+            if(!schools.error&&schools.data){
+                schools.data.forEach(s=>{
+                    const ex=db.schools[s.id];
+                    if(ex) s.lifetime=Math.max(ex.lifetime||0,s.lifetime||0);
+                    db.schools[s.id]=s;
+                });
+            }
+            if(!teachers.error&&teachers.data){
+                teachers.data.forEach(t=>{
+                    const ex=db.teachers[t.id];
+                    if(ex) t.lifetime=Math.max(ex.lifetime||0,t.lifetime||0);
+                    db.teachers[t.id]=t;
+                });
+            }
+            if(!periods.error&&periods.data){
+                periods.data.forEach(p=>{
+                    const ex=db.periods[p.id];
+                    if(ex){
+                        p.score        =Math.max(ex.score||0,        p.score||0);
+                        p.colts        =Math.max(ex.colts||0,        p.colts||0);
+                        p.totalLifetime=Math.max(ex.totalLifetime||0, p.totalLifetime||0);
+                    }
+                    db.periods[p.id]=p;
+                });
+            }
             if(!feed.error&&feed.data)db.networkFeed=feed.data;
             console.log('✅ Supabase data loaded');
             updatePublicLeaderboards();
@@ -987,6 +1010,7 @@ window.addEventListener('DOMContentLoaded',()=>{
 window.supabaseClient
     .channel('all-ecolink-changes')
     .on('postgres_changes',{event:'*',schema:'public',table:'schools'},(payload)=>{
+        if(Date.now()<_suppressRealtimeUntil) return;
         console.log('📍 Schools:',payload.eventType);
         if(payload.new){
             const ex=db.schools[payload.new.id];
@@ -997,6 +1021,7 @@ window.supabaseClient
         updatePublicLeaderboards();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'teachers'},(payload)=>{
+        if(Date.now()<_suppressRealtimeUntil) return;
         console.log('👨‍🏫 Teachers:',payload.eventType);
         if(payload.new){
             const ex=db.teachers[payload.new.id];
@@ -1007,6 +1032,7 @@ window.supabaseClient
         updatePublicLeaderboards();
     })
     .on('postgres_changes',{event:'*',schema:'public',table:'periods'},(payload)=>{
+        if(Date.now()<_suppressRealtimeUntil) return;
         console.log('📅 Periods:',payload.eventType);
         if(payload.new){
             const ex=db.periods[payload.new.id];
@@ -1021,6 +1047,7 @@ window.supabaseClient
         updatePublicLeaderboards();
     })
     .on('postgres_changes',{event:'INSERT',schema:'public',table:'networkFeed'},(payload)=>{
+        if(Date.now()<_suppressRealtimeUntil) return;
         console.log('📡 Feed:',payload.eventType);
         if(payload.new&&!db.networkFeed.some(f=>f.id===payload.new.id)) db.networkFeed.unshift(payload.new);
         updatePublicLeaderboards();
@@ -1028,6 +1055,7 @@ window.supabaseClient
     .subscribe((status)=>{
         if(status==='SUBSCRIBED') console.log('✅ Realtime Connected!');
     });
+});
 
 // Global button click feedback audio tone tracker
 document.addEventListener('click', e => {
