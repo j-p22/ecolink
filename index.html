@@ -876,8 +876,43 @@ function staffAddTeacher(){openStyledModal({title:'Add Teacher',subtitle:'Set up
 function staffDeleteTeacher(id){showConfirm('Delete Teacher?','This will remove the teacher and all data permanently.','⚠️','Delete',()=>{Object.keys(db.periods).forEach(k=>{if(db.periods[k].teacherId===id)delete db.periods[k];});delete db.teachers[id];save();renderStaffDashboard();showToast('Teacher removed','success','🗑️',2000);});}
 
 function renderNetworkDashboard(){const list=document.getElementById('networkSchoolsList'),emEl=document.getElementById('networkEmpty');list.innerHTML='';const schools=Object.values(db.schools);if(!schools.length){emEl?.classList.remove('hidden');}else{emEl?.classList.add('hidden');}schools.forEach(s=>{let tCount=Object.values(db.teachers).filter(t=>t.schoolId===s.id).length,impact=Object.values(db.teachers).filter(t=>t.schoolId===s.id).reduce((a,t)=>a+t.lifetime,0);s.lifetime=Math.floor(impact);list.innerHTML+=`<tr class="border-b border-white/4 hover:bg-white/3 transition"><td class="py-3.5 px-5 text-white font-semibold">${s.name}</td><td class="py-3.5 px-5 text-red-400 font-mono text-xs">${s.code}</td><td class="py-3.5 px-5 text-slate-400 font-semibold">${tCount}</td><td class="py-3.5 px-5 text-white font-black">${s.lifetime.toLocaleString()}</td><td class="py-3.5 px-5 text-right"><div class="flex gap-1.5 justify-end"><button onclick="networkEditSchool('${s.id}')" class="text-white bg-white/6 hover:bg-white/12 px-3 py-1.5 rounded-lg text-xs font-bold transition">Edit</button><button onclick="networkDeleteSchool('${s.id}')" class="text-red-500 bg-red-500/8 hover:bg-red-500/20 px-3 py-1.5 rounded-lg text-xs font-bold transition">Delete</button></div></td></tr>`;});save();}
-function networkEditSchool(sId){let s=db.schools[sId];openStyledModal({title:'Edit School',subtitle:`Modify ${s.name}`,emoji:'🏫',fields:[{label:'School Name',type:'text',default:s.name},{label:'Staff Code',type:'text',default:s.code}],submitLabel:'Save',submitClass:'modal-btn-danger',onSubmit:(v)=>{if(!v[0]||!v[1])return;s.name=v[0];s.code=v[1].toUpperCase();save();renderNetworkDashboard();showToast('School updated!','success','✅',2000);}});}
-function networkAddSchool(){openStyledModal({title:'Add School',subtitle:'Register a new school',emoji:'🏫',fields:[{label:'School Name',type:'text',placeholder:'Oak Ridge Middle School'}],submitLabel:'Add School',submitClass:'modal-btn-danger',onSubmit:(v)=>{if(!v[0]){showToast('Name required','error','❌');return;}const sId='SCH-'+genCode(),sCode='STAFF-'+genCode().slice(0,4);db.schools[sId]={id:sId,name:v[0],code:sCode,lifetime:0,pointsPerPrize:100,prizeValue:25,prizeName:'Eco Cash',itemsPerFive:1,recyclables:getDefaultRecyclables()};save();renderNetworkDashboard();addNetworkFeedItem(`${v[0]} joined the network!`,'🏫');showToast(`${v[0]} added`,'success','🏫',3000);}});}
+function networkEditSchool(sId){let s=db.schools[sId];openStyledModal({title:'Edit School',subtitle:`Modify ${s.name}`,emoji:'🏫',fields:[{label:'School Name',type:'text',default:s.name},{label:'Staff Code',type:'text',default:s.code}],submitLabel:'Save',submitClass:'modal-btn-danger',onSubmit:(v)=>{if(!v[0]||!v[1])return;s.name=v[0];s.code=v[1].toUpperCase();save();renderNetworkDashboard();showToast('School updated!','success','✅',2000);}});}function networkAddSchool(){
+    openStyledModal({
+        title:'Add School',
+        subtitle:'Register a new school',
+        emoji:'🏫',
+        fields:[{label:'School Name',type:'text',placeholder:'Oak Ridge Middle School'}],
+        submitLabel:'Add School',
+        submitClass:'modal-btn-danger',
+        onSubmit: async (v) => { // Added 'async' keyword here
+            if(!v[0]){
+                showToast('Name required','error','❌');
+                return;
+            }
+            const sId='SCH-'+genCode(), sCode='STAFF-'+genCode().slice(0,4);
+            db.schools[sId]={
+                id:sId,
+                name:v[0],
+                code:sCode,
+                lifetime:0,
+                pointsPerPrize:100,
+                prizeValue:25,
+                prizeName:'Eco Cash',
+                itemsPerFive:1,
+                recyclables:getDefaultRecyclables()
+            };
+            
+            // Wait for database logic tracking to fully wrap up
+            if (typeof save === 'function') {
+                await save();
+            }
+            
+            renderNetworkDashboard();
+            addNetworkFeedItem(`${v[0]} joined the network!`,'🏫');
+            showToast(`${v[0]} added`,'success','🏫',3000);
+        }
+    });
+}
 function networkDeleteSchool(sId){showConfirm('Delete School?','This will remove this school and all data.','⚠️','Delete',()=>{Object.keys(db.teachers).forEach(tId=>{if(db.teachers[tId].schoolId===sId){Object.keys(db.periods).forEach(pId=>{if(db.periods[pId].teacherId===tId)delete db.periods[pId];});delete db.teachers[tId];}});delete db.schools[sId];save();renderNetworkDashboard();showToast('School removed','success','🗑️',2000);});}
 function resetNetwork(){showConfirm('Factory Reset?','This will wipe ALL data.','🔴','Continue',()=>{openStyledModal({title:'Confirm Reset',subtitle:'Type RESET to confirm',emoji:'🔴',fields:[{label:'Type RESET to confirm',type:'text',placeholder:'RESET'}],submitLabel:'Factory Reset',submitClass:'modal-btn-danger',onSubmit:(v)=>{if(v[0]==='RESET'){localStorage.removeItem('ecolink_v5');localStorage.removeItem('ecolink_onboarded');localStorage.removeItem('ecolink_theme');location.reload();}else showToast('Reset cancelled','error','❌');}});});}
 
@@ -963,35 +998,75 @@ window.addEventListener('DOMContentLoaded',()=>{
             if(payload.old&&payload.eventType==='DELETE')delete db.teachers[payload.old.id];
             updatePublicLeaderboards();
         })
-        .on('postgres_changes',{event:'*',schema:'public',table:'periods'},(payload)=>{
-            console.log('📚 Periods:',payload.eventType);
-            if(payload.new)db.periods[payload.new.id]=payload.new;
-            if(payload.old&&payload.eventType==='DELETE')delete db.periods[payload.old.id];
-            if(currentUser&&payload.new&&payload.new.id===currentUser.id)currentUser=payload.new;
-            updatePublicLeaderboards();
-            if(typeof updateClassUI==='function')updateClassUI();
-        })
-        .on('postgres_changes',{event:'INSERT',schema:'public',table:'networkFeed'},(payload)=>{
+.on('postgres_changes',{event:'INSERT',schema:'public',table:'networkFeed'},(payload)=>{
             console.log('📡 Feed:',payload.eventType);
-            if(payload.new)db.networkFeed.unshift(payload.new);
+            if(payload.new && !db.networkFeed.some(f => f.id === payload.new.id)) db.networkFeed.unshift(payload.new);
             updatePublicLeaderboards();
         })
         .subscribe((status)=>{
-            if(status==='SUBSCRIBED')console.log('✅ Realtime: schools, teachers, periods, networkFeed');
+            if(status==='SUBSCRIBED') console.log('✅ Realtime Connected!');
         });
 });
-// Add this right where your other window.onload / initialization logic is
-window.addEventListener('DOMContentLoaded', () => {
-    // 1. Fetch data immediately when someone opens the site
-    if (typeof initLeaderboard === 'function') {
-        initLeaderboard();
+
+// A clean startup system that updates our local data with live cloud database tables first
+async function syncCloudDatabaseData() {
+    console.log("🔄 Merging cloud database data with memory...");
+    try {
+        // 1. Fetch existing schools
+        const { data: schoolsData } = await supabase.from('schools').select('*');
+        if (schoolsData && schoolsData.length > 0) {
+            schoolsData.forEach(s => db.schools[s.id] = s);
+        }
+
+        // 2. Fetch existing teachers
+        const { data: teachersData } = await supabase.from('teachers').select('*');
+        if (teachersData && teachersData.length > 0) {
+            teachersData.forEach(t => db.teachers[t.id] = t);
+        }
+
+        // 3. Fetch existing periods
+        const { data: periodsData } = await supabase.from('periods').select('*');
+        if (periodsData && periodsData.length > 0) {
+            periodsData.forEach(p => db.periods[p.id] = p);
+        }
+
+        // 4. Fetch existing network feed items
+        const { data: feedData } = await supabase.from('networkFeed').select('*').order('timestamp', { ascending: false });
+        if (feedData && feedData.length > 0) {
+            db.networkFeed = feedData;
+        }
+
+        console.log("💾 Database synchronization complete!");
+        
+        // Render user interface components using the newly merged data state
+        updatePublicLeaderboards();
+        if (typeof initLeaderboard === 'function') initLeaderboard();
+        if (typeof fetchGlobalStats === 'function') fetchGlobalStats();
+
+    } catch (e) {
+        console.error("Cloud synchronization mismatch error:", e);
     }
-    if (typeof fetchGlobalStats === 'function') {
-        fetchGlobalStats();
+}
+
+// Global button click feedback audio tone tracker
+document.addEventListener('click', e => {
+    if (e.target.closest('button')) {
+        const txt = e.target.textContent || '';
+        if (txt.includes('Enter') || txt.includes('Submit') || txt.includes('Confirm')) playTone(850, 1100, 0.15);
+        else playTone(650, 'sine', 0.08, 0.05);
     }
-});
-document.addEventListener('click',e=>{if(e.target.closest('button')){const txt=e.target.textContent||'';if(txt.includes('Enter')||txt.includes('Submit')||txt.includes('Confirm'))playTone(850,1100,0.15);else playTone(650,'sine',0.08,0.05);}},true);
-window.onload=()=>{updatePublicLeaderboards();initScrollAnimations();initLeaves();initNavShrink();checkFirstVisit();};
+}, true);
+
+// Unified window startup flow
+window.onload = () => {
+    initScrollAnimations();
+    initLeaves();
+    initNavShrink();
+    checkFirstVisit();
+    
+    // Download and run the cloud setup
+    syncCloudDatabaseData();
+};
 </script>
 </body>
 </html>
