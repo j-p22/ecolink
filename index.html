@@ -1029,46 +1029,6 @@ window.supabaseClient
         if(status==='SUBSCRIBED') console.log('✅ Realtime Connected!');
     });
 
-// A clean startup system that updates our local data with live cloud database tables first
-async function syncCloudDatabaseData() {
-    console.log("🔄 Merging cloud database data with memory...");
-    try {
-        // 1. Fetch existing schools
-        const { data: schoolsData } = await supabase.from('schools').select('*');
-        if (schoolsData && schoolsData.length > 0) {
-            schoolsData.forEach(s => db.schools[s.id] = s);
-        }
-
-        // 2. Fetch existing teachers
-        const { data: teachersData } = await supabase.from('teachers').select('*');
-        if (teachersData && teachersData.length > 0) {
-            teachersData.forEach(t => db.teachers[t.id] = t);
-        }
-
-        // 3. Fetch existing periods
-        const { data: periodsData } = await supabase.from('periods').select('*');
-        if (periodsData && periodsData.length > 0) {
-            periodsData.forEach(p => db.periods[p.id] = p);
-        }
-
-        // 4. Fetch existing network feed items
-        const { data: feedData } = await supabase.from('networkFeed').select('*').order('timestamp', { ascending: false });
-        if (feedData && feedData.length > 0) {
-            db.networkFeed = feedData;
-        }
-
-        console.log("💾 Database synchronization complete!");
-        
-        // Render user interface components using the newly merged data state
-        updatePublicLeaderboards();
-        if (typeof initLeaderboard === 'function') initLeaderboard();
-        if (typeof fetchGlobalStats === 'function') fetchGlobalStats();
-
-    } catch (e) {
-        console.error("Cloud synchronization mismatch error:", e);
-    }
-}
-
 // Global button click feedback audio tone tracker
 document.addEventListener('click', e => {
     if (e.target.closest('button')) {
@@ -1084,9 +1044,6 @@ window.onload = () => {
     initLeaves();
     initNavShrink();
     checkFirstVisit();
-    
-    // Download and run the cloud setup
-    syncCloudDatabaseData();
 };
 </script>
 </body>
